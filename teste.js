@@ -20,10 +20,18 @@ const DataManager = require('./modules/Database')
 // })
 
 
-DataManager.Area.getById(2).then((res) => {
-    console.log(res)
-})
+// DataManager.Area.getById(2).then((res) => {
+//     console.log(res)
+// })
 
+
+// DataManager.Area.insert("História", "Área que se dedica ao estudo e a documentação sistemática do passado humano")
+
+
+// DataManager.Topico.insert("Revolução Francesa", 3)
+// DataManager.Topico.insert("Império Romano", 3)
+// DataManager.Topico.insert("Processos de Software", 1)
+// DataManager.Topico.insert("Design Patterns", 1)
 
 // DataManager.Area.update('descricao', 'A área que se dedica a entender e descobrar os pilares da matemática e suas consequências', 2)
 

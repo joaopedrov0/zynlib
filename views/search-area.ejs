@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscando - Zyn Library</title>
+    <link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+    <header>
+        <a href="/">
+            <h1>Zyn Library</h1>
+        </a>
+    </header>
+    <main>
+        <div class="container search-container">
+            <% data.forEach((dataUnit) => { %>
+                <a class="search-card" href="/search/<%=dataUnit.id_area%>">
+                    <p class="title"><%=dataUnit.nome%></p>
+                    <p class="desc"><%=dataUnit.descricao%></p>
+                </a>
+            <% }) %>
+
+        </div>
+    </main>
+    <footer><a href="https://github.com/joaopedrov0">@joaopedrov0</a></footer>
+</body>
+</html>

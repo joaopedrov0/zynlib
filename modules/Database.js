@@ -93,6 +93,10 @@ class DataManager {
         getAll: async () => {
             return await DataManager.genericGetAll("Topico")
         },
+        getByArea: async (id) => {
+            const [rows, fields] = await DataManager.pool.query(`SELECT * FROM Topico WHERE id_area = ?`, [id])
+            return rows
+        }
     }
     static Conteudo = {
         insert: async (conteudo_markdown, id_usuario) => {
@@ -110,6 +114,11 @@ class DataManager {
         getAll: async () => {
             return await DataManager.genericGetAll("Conteudo")
         },
+        getAllSearch: async () => {
+            // ! Testar query
+            const [rows, fields] = await DataManager.pool.query("SELECT Conteudo.id_conteudo, Usuario.id_usuario FROM Conteudo INNER JOIN Usuario ON (Conteudo.id_usuario = Usuario.id_usuario)")
+            return rows
+        }
     }
     static MaterialExterno = {
         insert: async (material, tipo_material) => {
@@ -144,6 +153,9 @@ class DataManager {
         getAll: async () => {
             return await DataManager.genericGetAll("Usuario")
         },
+        getByUsername: async (usuario) => {
+
+        }
     }
     static Recomendacao = {
         insert: async (id_conteudo, id_material_externo) => {
