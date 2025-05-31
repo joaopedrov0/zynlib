@@ -9,14 +9,23 @@
 <body>
     <header>
         <h1>Zyn Library</h1>
+        <div class="login-info">
+            <% if (loginInfo) { %>
+                <span class="name"><%= loginInfo.nome %></span>
+                <span class="username">@<%= loginInfo.usuario %></span>
+            <% } %>
+        </div>
     </header>
     <main>
         <div class="container">
-            <a href="/search">Buscar material</a>
-            <a href="/create-area">Criar área do conhecimento</a>
-            <a href="/create-topic">Criar tópico</a>
-            <a href="/login">Logar</a>
-            <a href="/register">Cadatro</a>
+            <div class="initial-menu">
+                <a href="/search">Buscar material</a>
+                <a href="/login">Login</a>
+                <a href="/register">Cadastro</a>
+                <a href="/create-area">Criar área do conhecimento</a>
+                <a href="/create-topic">Criar tópico</a>
+                <a href="/create-content">Criar Material</a>
+            </div>
         </div>
     </main>
     <footer><a href="https://github.com/joaopedrov0">@joaopedrov0</a></footer>

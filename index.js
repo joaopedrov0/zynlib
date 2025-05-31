@@ -2,6 +2,7 @@ const express = require('express')
 const path = require('path')
 const app = express()
 const port = 3000
+const cookieParser = require("cookie-parser")
 // const bodyParser = require('body-parser')
 
 const DataManager = require("./modules/Database")
@@ -11,14 +12,17 @@ const DataManager = require("./modules/Database")
 app.use(express.static('public'))
 app.use(express.json())
 app.use(express.urlencoded())
+app.use(cookieParser())
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, '/views'))
 
 // DataManager.Area.insert("Engenharia de Software", "Uma área dedicada ao estudo dos processos de alto nível do desenvolvimento de software.")
 
-let res = DataManager.Area.getAll()
-
-console.log(res)
+const cookieConfig = {
+    maxAge: 3600000,
+    httpOnly: true,
+    secure: false,
+}
 
 // res.then(()=>{
 //     console.log(res)
@@ -35,25 +39,43 @@ console.log(res)
 
 
 app.get('/', (req, res) => {
-    res.render('index')
+    const loginInfo = req.cookies.user
+    
+    res.render('index', {
+        loginInfo
+    })
 })
 
 app.get('/search', (req, res) => {
+    const loginInfo = req.cookies.user
     DataManager.Area.getAll().then((areas) => {
         console.dir(areas)
-        res.render("search-area", {"data": areas})
+        res.render("search-area", {
+            "data": areas,
+            loginInfo
+        })
     })
 })
 
 app.get('/search/:area', (req, res) => {
+    const loginInfo = req.cookies.user
     const { area } = req.params
     DataManager.Topico.getByArea(area).then((topicos) => {
         console.dir(topicos)
         res.render("search-topico", {
-            "data": topicos
+            "data": topicos,
+            loginInfo
         })
     })
 })
+
+app.get('/search/:area/:topic', (req, res) => {
+    const loginInfo = req.cookies.user
+    const { area, topic } = req.params
+    DataManager.Conteudo.getByTopic(topic).then((conteudos) => {
+        res.render('search-conteudo', {loginInfo, conteudos})
+    })
+})  
 
 app.get('/register', (req, res) => {
     res.render('cadastro')
@@ -74,10 +96,26 @@ app.post('/login', (req, res) => {
     if (req.method == "POST"){
         const { username, senha } = req.body
         console.log(`Tentativa de login de username ${username} e senha ${senha}`)
-        res.redirect('/')
+        DataManager.Usuario.matchUsernamePassword(username, senha).then((usuario) => {
+            res.cookie("user", usuario, cookieConfig)
+            res.redirect('/')
+        })
     }
 })
 
+app.get('/create-area', (req, res) => {
+    // const loginInfo
+})
+
+app.get('/create-topic', (req, res) => {
+
+})
+
+app.get('/create-content', (req, res) => {
+    const loginInfo = req.cookies.user
+
+    res.render('writing-content')
+})
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`)

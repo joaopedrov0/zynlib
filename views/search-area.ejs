@@ -11,6 +11,12 @@
         <a href="/">
             <h1>Zyn Library</h1>
         </a>
+        <div class="login-info">
+            <% if (loginInfo) { %>
+                <span class="name"><%= loginInfo.nome %></span>
+                <span class="username">@<%= loginInfo.usuario %></span>
+            <% } %>
+        </div>
     </header>
     <main>
         <div class="container search-container">

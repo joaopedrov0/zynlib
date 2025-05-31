@@ -21,8 +21,9 @@
     <main>
         <div class="container search-container">
             <% data.forEach((dataUnit) => { %>
-                <a class="search-card" href="/search/<%=dataUnit.id_area%>/<%=dataUnit.id_topico%>">
+                <a class="search-card" href="/read/<%=dataUnit.id_conteudo%>">
                     <p class="title"><%=dataUnit.nome%></p>
+                    p
                 </a>
             <% }) %>
 

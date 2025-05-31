@@ -116,6 +116,7 @@ class DataManager {
         },
         getAllSearch: async () => {
             // ! Testar query
+            // Objetivo: recuperar o ID do
             const [rows, fields] = await DataManager.pool.query("SELECT Conteudo.id_conteudo, Usuario.id_usuario FROM Conteudo INNER JOIN Usuario ON (Conteudo.id_usuario = Usuario.id_usuario)")
             return rows
         }
@@ -153,8 +154,9 @@ class DataManager {
         getAll: async () => {
             return await DataManager.genericGetAll("Usuario")
         },
-        getByUsername: async (usuario) => {
-
+        matchUsernamePassword: async (usuario, senha) => {
+            const [rows, fields] = await DataManager.pool.query(`SELECT * FROM Usuario WHERE (Usuario.usuario = ?) AND (Usuario.senha = ?)`, [usuario, senha])
+            return rows.length > 0 ? rows[0] : null 
         }
     }
     static Recomendacao = {

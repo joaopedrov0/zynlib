@@ -19,6 +19,19 @@ const DataManager = require('./modules/Database')
 //     console.log(b)
 // })
 
+// DataManager.pool.query("SELECT Topico.nome AS 'Topico', Area.nome AS 'Area' FROM Area INNER JOIN Topico ON (Topico.id_area = Area.id_area)").then((res) => {
+//     const [rows, fields] = res
+//     console.dir(rows)
+// })
+
+// DataManager.Usuario.matchUsernamePassword("emmaayers", "abacate").then((res) => {
+//     console.log(res)
+//     DataManager.pool.end()
+// })
+
+DataManager.Conteudo.getByTopic(2).then((res) => {
+    console.log(res)
+})
 
 // DataManager.Area.getById(2).then((res) => {
 //     console.log(res)
