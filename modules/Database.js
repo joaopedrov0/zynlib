@@ -10,19 +10,19 @@ const mysql = require('mysql2/promise')
 
 // connection.connect()
 
-// function ensureAll(){
-//     connection.query(queries['ensureDatabase'])
-//     connection.query("USE zynlibrary")
-//     connection.query(queries['ensureArea'])
-//     connection.query(queries['ensureTopico'])
-//     connection.query(queries['ensureConteudo'])
-//     connection.query(queries['ensureMaterialExterno'])
-//     connection.query(queries['ensureUsuario'])
-//     connection.query(queries['ensureRecomendacao'])
-//     connection.query(queries['ensurePalavraChave'])
-//     connection.query(queries['ensureTagConteudo'])
+// async function ensureAll(){
+//     await DataManager.pool.query(queries['ensureDatabase'])
+//     await DataManager.pool.query("USE zynlibrary")
+//     await DataManager.pool.query(queries['ensureArea'])
+//     await DataManager.pool.query(queries['ensureTopico'])
+//     await DataManager.pool.query(queries['ensureMaterialExterno'])
+//     await DataManager.pool.query(queries['ensureUsuario'])
+//     await DataManager.pool.query(queries['ensureConteudo'])
+//     await DataManager.pool.query(queries['ensureRecomendacao'])
+//     await DataManager.pool.query(queries['ensurePalavraChave'])
+//     await DataManager.pool.query(queries['ensureTagConteudo'])
 // }
-// // ensureAll()
+// ensureAll()
 
 // connection.end()
 
@@ -99,8 +99,8 @@ class DataManager {
         }
     }
     static Conteudo = {
-        insert: async (conteudo_markdown, id_usuario) => {
-            DataManager.genericInsert("Conteudo", "?, ?", [conteudo_markdown, id_usuario])
+        insert: async (nome, id_topico, conteudo_markdown, id_usuario) => {
+            DataManager.genericInsert("Conteudo", "?, ?, ?, ?", [nome, id_topico, conteudo_markdown, id_usuario])
         },
         update: async (column, value, id) => {
             DataManager.genericUpdate("Conteudo", column, value, "id_conteudo", id)

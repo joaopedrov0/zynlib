@@ -19,7 +19,7 @@
 body{
     max-width: 100vw;
     min-height: 100vh;
-    color: aliceblue;
+    color: rgb(50, 50, 50);
 
     font-family: var(--text-font);
 }
@@ -33,6 +33,7 @@ header{
     padding: 20px;
 
 
+    color: aliceblue;
     background: rgb(30, 30, 30);
 }
 
@@ -51,6 +52,7 @@ main{
     justify-content: center;
     padding: 20px;
     height: 100%;
+    /* color: rgb(30, 30, 30); */
 }
 
 .container{
@@ -73,10 +75,21 @@ main{
     justify-content: center;
     align-items: center;
     text-align: center;
-    color: inherit;
+    color: aliceblue;
     text-decoration: none;
     border-radius: 10px;
     font-size: 22px;
+}
+
+.option-card{
+    box-shadow: 0px 0px 0px rgba(20, 20, 20, 0.5);
+    transform: translate(0px, 0px);
+    transition: all 100ms cubic-bezier(.5,.39,.6,1.31);
+}
+
+.option-card:hover{
+    box-shadow: 10px 10px 0px rgba(20, 20, 20, 0.5);
+    transform: translate(-10px, -10px);
 }
 
 .search-container{
@@ -87,7 +100,7 @@ main{
 }
 
 a.search-card{
-    color: inherit;
+    color: aliceblue;
     text-decoration: none;
 }
 
@@ -119,5 +132,35 @@ footer{
 }
 
 footer a {
-    color: inherit;
+    color: aliceblue;
+}
+
+.editor-preview{
+    ul, ol{
+        padding: 15px;
+        /* list-style-type: disc; */
+    }
+    blockquote{
+        border-left: 3px solid rgb(30, 30, 30);
+        background-color: rgb(230, 230, 230);
+        padding: 15px;
+    }
+    img{
+        width: clamp(300px, 500px, 80%);
+        border-radius: 10px;
+    }
+}
+
+.btn-save-content{
+    padding: 15px;
+    background: rgb(30, 30, 30);
+    color: aliceblue;
+    border-radius: 10px;
+    width: fit-content;
+    transition: all 200ms ease;
+}
+
+.btn-save-content:hover{
+    cursor: pointer;
+    opacity: 0.8;
 }

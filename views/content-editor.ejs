@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criação de conteúdo - Zyn Library</title>
+    <link rel="stylesheet" href="/style/style.css">
+    
+    <!-- markdown editor -->
+    <!-- Github: https://github.com/Ionaru/easy-markdown-editor -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js" defer></script>
+    
+    <script src="/javascript/markdown-editor.js" defer></script>
+</head>
+<body>
+    <header>
+        <a href="/">
+            <h1>Zyn Library</h1>
+        </a>
+        <div class="login-info">
+            <% if (loginInfo) { %>
+                <span class="name"><%= loginInfo.nome %></span>
+                <span class="username">@<%= loginInfo.usuario %></span>
+            <% } %>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <h2>Criação de Conteúdo</h2>
+            <form action="/create-content" method="POST">
+                <div class="meta-box">
+                    <input type="text" name="content-title" id="content-title" placeholder="Digite o título do conteúdo aqui">
+                    <select name="area" id="content-area">
+                        <option value="" disabled selected>Selecione a área</option>
+                        <% areas.forEach((area) => { %>
+                            <option value="<%=area.id_area%>"><%=area.nome%></option>
+                        <% }) %>
+                    </select>
+                    <select name="topic" id="content-topic">
+                        <option value="" disabled selected>Selecione o tópico</option>
+                        
+                    </select>
+                    <!-- <input type="text" name="keywords" id="keywords-input" placeholder="Selecione palavras-chave" disabled> -->
+                    <!-- <div class="tag">
+                        <input type="checkbox" name="keyword-1" value="Palavra-chave" checked>
+                        <label for="keyword-1">Teste</label>
+                    </div> -->
+                </div>
+                <!-- <div class="keyword">
+                    <select name="keywords" id="keywords">
+                        <option value="" disabled selected>Selecione palavras-chave</option>
+                    </select>
+                    <input type="text" name="newKeyword" id="newKeyword" placeholder="Digite aqui uma nova palavra chave">
+                </div> -->
+                <div class="content-box markdown-editor-box">
+                    <textarea name="markdown-editor" id="markdown-editor"></textarea>
+                </div>
+                <div class="external-material">
+                    <h3>Materiais externos</h3>
+                    <!-- <input type="text" name="mate" id=""> -->
+                </div>
+                <div class="btn-save-content">SALVAR A PORRA DO MATERIAL</div>
+            </form>
+        </div>
+    </main>
+    <footer><a href="https://github.com/joaopedrov0">@joaopedrov0</a></footer>
+</body>
+</html>

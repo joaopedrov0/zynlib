@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criação de Área - Zyn Library</title>
+    <link rel="stylesheet" href="/style/style.css">
+</head>
+<body>
+    <header>
+        <a href="/">
+            <h1>Zyn Library</h1>
+        </a>
+    </header>
+    <main>
+        <div class="container">
+            <form action="/create-topic" method="POST">
+            <select name="area" id="area-select">
+                <option value="" selected disabled>Selecione a área referente a esse tópico</option>
+                <% areas.forEach((area) => { %>
+                    <option value="<%=area.id_area%>"><%=area.nome%></option>
+                <% }) %>
+            </select>
+            <!-- <h2>Criação de Conteúdo</h2> -->
+                <input type="text" name="nome" placeholder="Digite o nome do novo tópico aqui">
+                <button type="submit">Criar tópico</button>
+            </form>
+        </div>
+    </main>
+    <footer><a href="https://github.com/joaopedrov0">@joaopedrov0</a></footer>
+</body>
+</html>

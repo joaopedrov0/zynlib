@@ -11,16 +11,11 @@ const queries = {
         id_area INT NOT NULL,
         FOREIGN KEY (id_area) REFERENCES Area(id_area)
     );`,
-    ensureConteudo: `CREATE TABLE IF NOT EXISTS Conteudo(
-        id_conteudo INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        conteudo_markdown MEDIUMTEXT NOT NULL,
-        id_usuario INT NOT NULL
-    );`,
     ensureMaterialExterno: `CREATE TABLE IF NOT EXISTS MaterialExterno(
         id_material_externo INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         material TEXT NOT NULL,
         tipo_material TEXT NOT NULL
-    );`,
+        );`,
     ensureUsuario: `CREATE TABLE IF NOT EXISTS Usuario(
         id_usuario INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,
@@ -29,6 +24,15 @@ const queries = {
         email VARCHAR(255),
         tipo_perfil ENUM('admin', 'professor', 'estudante'),
         imagem_perfil BLOB(65535)
+        );`,
+    ensureConteudo: `CREATE TABLE IF NOT EXISTS Conteudo(
+        id_conteudo INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        nome TEXT NOT NULL,
+        id_topico INT NOT NULL,
+        conteudo_markdown MEDIUMTEXT NOT NULL,
+        id_usuario INT NOT NULL,
+        FOREIGN KEY (id_topico) REFERENCES Topico(id_topico),
+        FOREIGN KEY (id_usuario) REFERENCES Usuario(id_usuario)
     );`,
     ensureRecomendacao: `CREATE TABLE IF NOT EXISTS Recomendacao(
         id_recomendacao INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

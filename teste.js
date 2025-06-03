@@ -1,5 +1,5 @@
 const DataManager = require('./modules/Database')
-
+const queries = require('./modules/queries')
 // let a = DataManager.Area.getById(1)
 // let a = DataManager.genericGetById("Area", "id_area", 1)
 
@@ -29,9 +29,18 @@ const DataManager = require('./modules/Database')
 //     DataManager.pool.end()
 // })
 
-DataManager.Conteudo.getByTopic(2).then((res) => {
-    console.log(res)
-})
+// DataManager.Conteudo.getByTopic(2).then((res) => {
+//     console.log(res)
+// })
+// DataManager.pool.query()
+// DataManager.pool.query("DROP TABLE Conteudo").then(() => {
+
+//     DataManager.pool.query(queries['ensureConteudo']).then(() => {
+//         DataManager.pool.end()
+//     })
+// })
+
+
 
 // DataManager.Area.getById(2).then((res) => {
 //     console.log(res)

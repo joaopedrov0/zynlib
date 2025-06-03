@@ -104,18 +104,70 @@ app.post('/login', (req, res) => {
 })
 
 app.get('/create-area', (req, res) => {
-    // const loginInfo
+    const loginInfo = req.cookies.user
+
+    res.render('create-area', {loginInfo})
 })
 
 app.get('/create-topic', (req, res) => {
+    const loginInfo = req.cookies.user
 
+    DataManager.Area.getAll().then((areas) => {
+        res.render('create-topic', {loginInfo, areas})
+    })
 })
 
 app.get('/create-content', (req, res) => {
     const loginInfo = req.cookies.user
-
-    res.render('writing-content')
+    DataManager.Area.getAll().then((areas) => {
+        res.render('content-editor', {loginInfo, areas})
+    })
+    // ! ele deve tentar recuperar as áreas, e os tópicos apenas sob ordem do frontend
 })
+
+app.post('/create-content', (req, res) => {
+    if (req.method == "POST") {
+        const { titulo, area, topico, markdown, autor } = req.body
+        console.log("Inserindo novo material")
+        console.log(`Titulo: ${titulo}`)
+        console.log(`Area: ${area}`)
+        console.log(`Tópico: ${topico}`)
+        console.log(`==== Markdown ==== \n${markdown}`)
+        console.log(`Autor: ${autor}`)
+        DataManager.Conteudo.insert(titulo, topico, markdown)
+    }
+})
+
+app.post('/create-area', (req, res) => {
+    if (req.method == "POST"){
+        const { nome, descricao } = req.body
+        console.log(`Criando nova área "${nome}"`)
+        DataManager.Area.insert(nome, descricao)
+        res.redirect('/')
+    }
+})
+
+app.post('/create-topic', (req, res) => {
+    if (req.method == "POST"){
+        const { nome, area } = req.body
+        console.log(`Criando novo tópico ${nome} da área de ID ${area}`)
+        DataManager.Topico.insert(nome, area)
+        res.redirect('/')
+    }
+})
+
+
+// ? API ROUTES
+
+app.get('/get-topics/:id_area', (req, res) => {
+    const { id_area } = req.params
+    DataManager.Topico.getByArea(id_area).then((topics) => {
+        console.log(id_area)
+        console.log(topics)
+        res.json({topics})
+    })
+})
+
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`)
