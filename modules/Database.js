@@ -114,12 +114,16 @@ class DataManager {
         getAll: async () => {
             return await DataManager.genericGetAll("Conteudo")
         },
-        getAllSearch: async () => {
-            // ! Testar query
-            // Objetivo: recuperar o ID do
-            const [rows, fields] = await DataManager.pool.query("SELECT Conteudo.id_conteudo, Usuario.id_usuario FROM Conteudo INNER JOIN Usuario ON (Conteudo.id_usuario = Usuario.id_usuario)")
+        getAllByTopic: async (id_topico) => {
+            const [rows, fields] = await DataManager.pool.query(`SELECT Conteudo.id_conteudo AS 'id_conteudo', Conteudo.nome AS 'titulo', Topico.nome AS 'topico', Usuario.nome AS 'autor', Conteudo.id_topico FROM Conteudo INNER JOIN Usuario ON (Conteudo.id_usuario = Usuario.id_usuario) INNER JOIN Topico ON (Topico.id_topico = Conteudo.id_topico) HAVING Conteudo.id_topico = ?;`, [id_topico])
             return rows
         }
+        // getAllSearch: async () => {
+        //     // ! Testar query
+        //     // Objetivo: recuperar o ID do
+        //     const [rows, fields] = await DataManager.pool.query("SELECT Conteudo.id_conteudo, Usuario.id_usuario FROM Conteudo INNER JOIN Usuario ON (Conteudo.id_usuario = Usuario.id_usuario)")
+        //     return rows
+        // }
     }
     static MaterialExterno = {
         insert: async (material, tipo_material) => {

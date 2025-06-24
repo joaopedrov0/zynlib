@@ -3,6 +3,19 @@ const queries = require('./modules/queries')
 // let a = DataManager.Area.getById(1)
 // let a = DataManager.genericGetById("Area", "id_area", 1)
 
+function ensureAll(){
+    console.log(queries['ensureDatabase'])
+    console.log("USE zynlibrary")
+    console.log(queries['ensureArea'])
+    console.log(queries['ensureTopico'])
+    console.log(queries['ensureMaterialExterno'])
+    console.log(queries['ensureUsuario'])
+    console.log(queries['ensureConteudo'])
+    console.log(queries['ensureRecomendacao'])
+    console.log(queries['ensurePalavraChave'])
+    console.log(queries['ensureTagConteudo'])
+}
+ensureAll()
 
     
 // let a = DataManager.pool.query("SELECT * FROM Area WHERE id_area = 2")

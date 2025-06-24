@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscando - Zyn Library</title>
     <link rel="stylesheet" href="/style/style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js" defer></script>
 </head>
 <body>
     <header>
@@ -20,16 +22,21 @@
     </header>
     <main>
         <h2 class="page-title">Áreas do conhecimento</h2>
-        <div class="container search-container">
-            <% data.forEach((dataUnit) => { %>
-                <a class="search-card option-card" href="/search/<%=dataUnit.id_area%>">
-                    <p class="title"><%=dataUnit.nome%></p>
-                    <p class="desc"><%=dataUnit.descricao%></p>
-                </a>
-            <% }) %>
+        <div class="container">
+            <h2><%=conteudo.nome%></h2>
+            <div class="conteudo-box">
 
+            </div>
         </div>
     </main>
     <footer><a href="https://github.com/joaopedrov0">@joaopedrov0</a></footer>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <script>
+        const content = `<%-conteudo.conteudo_markdown%>`
+        const md = window.markdownit();
+        const html = md.render(content);
+        const conteudoHTML = document.querySelector('.conteudo-box')
+    conteudoHTML.innerHTML = html
+    </script>
 </body>
 </html>

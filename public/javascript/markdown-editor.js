@@ -33,7 +33,7 @@ function sendContent(){
             "area": areaForm.value,
             "topico": topicForm.value,
             "markdown": easyMDE.value(),
-            "autor": ''
+            "autor": autor
         }),
         method: 'POST',
         headers: {

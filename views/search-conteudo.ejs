@@ -19,11 +19,13 @@
         </div>
     </header>
     <main>
+        <h2 class="page-title"><%=conteudos[0].topico%></h2>
         <div class="container search-container">
-            <% data.forEach((dataUnit) => { %>
-                <a class="search-card option-card" href="/read/<%=dataUnit.id_conteudo%>">
-                    <p class="title"><%=dataUnit.nome%></p>
-                    p
+            <% conteudos.forEach((conteudo) => { %>
+                <a class="search-card option-card" href="/read/<%=conteudo.id_conteudo%>">
+                    <p class="title"><%=conteudo.titulo%></p>
+                    <!-- <p class="topic"><%=conteudo.topico%></p> -->
+                    <p class="author">Por: <%=conteudo.autor%></p>
                 </a>
             <% }) %>
 

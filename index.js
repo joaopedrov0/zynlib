@@ -60,19 +60,23 @@ app.get('/search', (req, res) => {
 app.get('/search/:area', (req, res) => {
     const loginInfo = req.cookies.user
     const { area } = req.params
-    DataManager.Topico.getByArea(area).then((topicos) => {
-        console.dir(topicos)
-        res.render("search-topico", {
-            "data": topicos,
-            loginInfo
+    DataManager.Area.getById(area).then((areaObj) => {
+        console.log(areaObj)
+        DataManager.Topico.getByArea(area).then((topicos) => {
+            console.dir(topicos)
+            res.render("search-topico", {
+                "data": topicos,
+                loginInfo,
+                "area": areaObj.nome
+            })
         })
     })
 })
 
 app.get('/search/:area/:topic', (req, res) => {
     const loginInfo = req.cookies.user
-    const { area, topic } = req.params
-    DataManager.Conteudo.getByTopic(topic).then((conteudos) => {
+    const { topic } = req.params
+    DataManager.Conteudo.getAllByTopic(topic).then((conteudos) => {
         res.render('search-conteudo', {loginInfo, conteudos})
     })
 })  
@@ -134,7 +138,7 @@ app.post('/create-content', (req, res) => {
         console.log(`Tópico: ${topico}`)
         console.log(`==== Markdown ==== \n${markdown}`)
         console.log(`Autor: ${autor}`)
-        DataManager.Conteudo.insert(titulo, topico, markdown)
+        DataManager.Conteudo.insert(titulo, topico, markdown, autor)
     }
 })
 
@@ -154,6 +158,14 @@ app.post('/create-topic', (req, res) => {
         DataManager.Topico.insert(nome, area)
         res.redirect('/')
     }
+})
+
+app.get('/read/:id_conteudo', (req, res) => {
+    const { id_conteudo } = req.params
+    const loginInfo = req.cookies.user
+    DataManager.Conteudo.getById(id_conteudo).then((conteudo) => {
+        res.render('reading', {conteudo, loginInfo})
+    })
 })
 
 
