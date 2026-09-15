@@ -1,13 +1,17 @@
-# Zyn Library
+# Zyn Library (v2)
 
-- pagina inicial
-- pagina de seleção por area
-- pagina de seleção por tópico (não necessariamente outra página)
-- página de conteúdo
-- página de login/cadastro
-- página de criação de área/tópico
+Uma plataforma colaborativa e aberta para catalogação e compartilhamento de conhecimento acadêmico e técnico.
 
-## Observações durante o projeto
+## Arquitetura & Stack
+- **Framework**: [Next.js](https://nextjs.org/) (App Router, Server Actions, TypeScript)
+- **Backend & Banco de Dados**: [Supabase](https://supabase.com/) (PostgreSQL gerenciado, Row Level Security, Supabase Auth com Google OAuth)
+- **Estilização**: Tailwind CSS + Shadcn/UI
+- **Versionamento de Conteúdo**: Revisões auditáveis com snapshots em Markdown e visualização de diffs estilo Git.
 
-- Pode ser interessante ter nomes para mostrar na busca por menu. As palavras-chave são excelentes para buscas por palavras-chave, mas via navegação não é uma alternativa interessante.
-- Também é interessante associar o conteúdo com um tópico, para ser possível a seleção via navegação
+## Estrutura de Conhecimento
+```text
+Discipline (Disciplina) -> Subject (Assunto) -> Topic (Tópico) -> Material (1:1 Colaborativo)
+```
+
+## Documentação
+- Modelo de dados relacional e script SQL DDL: [`docs/data-model.md`](./docs/data-model.md)
