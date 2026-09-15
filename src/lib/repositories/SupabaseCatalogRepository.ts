@@ -3,6 +3,7 @@ import {
   DisciplineRecord,
   SubjectRecord,
   TopicRecord,
+  MaterialRevisionWithAuthor,
 } from "@/types/database";
 import {
   CatalogRepository,
@@ -149,5 +150,34 @@ export class SupabaseCatalogRepository implements CatalogRepository {
       );
     }
     return (data as unknown as MaterialWithRevision) ?? null;
+  }
+
+  async listMaterialRevisions(
+    materialId: string,
+  ): Promise<MaterialRevisionWithAuthor[]> {
+    const { data, error } = await this.client
+      .from("material_revisions")
+      .select(
+        `
+        id,
+        material_id,
+        author_id,
+        revision_number,
+        content_markdown,
+        change_summary,
+        created_at,
+        author:profiles!author_id(id, full_name, avatar_url, role)
+      `,
+      )
+      .eq("material_id", materialId)
+      .order("revision_number", { ascending: false });
+
+    if (error) {
+      throw new Error(
+        `Failed to list revisions for material '${materialId}': ${error.message}`,
+      );
+    }
+
+    return (data as unknown as MaterialRevisionWithAuthor[]) ?? [];
   }
 }

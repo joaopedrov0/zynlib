@@ -2,6 +2,7 @@ import {
   DisciplineRecord,
   SubjectRecord,
   TopicRecord,
+  MaterialRevisionWithAuthor,
 } from "@/types/database";
 import {
   CatalogRepository,
@@ -22,17 +23,20 @@ export class FakeCatalogRepository implements CatalogRepository {
   private subjects: SubjectRecord[];
   private topics: TopicRecord[];
   private materials: MaterialWithRevision[];
+  private revisions: MaterialRevisionWithAuthor[];
 
   constructor(
     disciplines: DisciplineRecord[] = [],
     subjects: SubjectRecord[] = [],
     topics: TopicRecord[] = [],
     materials: MaterialWithRevision[] = [],
+    revisions: MaterialRevisionWithAuthor[] = [],
   ) {
     this.disciplines = [...disciplines];
     this.subjects = [...subjects];
     this.topics = [...topics];
     this.materials = [...materials];
+    this.revisions = [...revisions];
   }
 
   async listDisciplines(): Promise<DisciplineRecord[]> {
@@ -77,5 +81,11 @@ export class FakeCatalogRepository implements CatalogRepository {
   ): Promise<MaterialWithRevision | null> {
     const matched = this.materials.find((item) => item.topic_id === topicId);
     return matched ?? null;
+  }
+
+  async listMaterialRevisions(
+    materialId: string,
+  ): Promise<MaterialRevisionWithAuthor[]> {
+    return this.revisions.filter((item) => item.material_id === materialId);
   }
 }

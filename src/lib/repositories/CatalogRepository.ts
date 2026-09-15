@@ -4,6 +4,7 @@ import {
   TopicRecord,
   MaterialRecord,
   MaterialRevisionRecord,
+  MaterialRevisionWithAuthor,
 } from "@/types/database";
 
 export interface MaterialWithRevision extends MaterialRecord {
@@ -21,4 +22,7 @@ export interface CatalogRepository {
   listTopics(subjectId: string): Promise<TopicRecord[]>;
   getTopicBySlug(subjectId: string, slug: string): Promise<TopicRecord | null>;
   getMaterialByTopicId(topicId: string): Promise<MaterialWithRevision | null>;
+  listMaterialRevisions(
+    materialId: string,
+  ): Promise<MaterialRevisionWithAuthor[]>;
 }
