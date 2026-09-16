@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
+import { CreateItemModal } from "@/components/hierarchy/CreateItemModal";
+import { DeleteItemButton } from "@/components/hierarchy/DeleteItemButton";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
 import { TopicRecord } from "@/types/database";
@@ -15,20 +17,31 @@ function renderTopicCard(
   topic: TopicRecord,
   disciplineSlug: string,
   subjectSlug: string,
+  canManage: boolean,
 ) {
   return (
-    <Link
+    <div
       key={topic.id}
-      href={`/${disciplineSlug}/${subjectSlug}/${topic.slug}`}
       className="group p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition-all hover:shadow-md hover:shadow-indigo-500/5 flex flex-col justify-between"
     >
       <div>
-        <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
-          <FileText className="w-5 h-5" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <FileText className="w-5 h-5" />
+          </div>
+          <DeleteItemButton
+            table="topics"
+            id={topic.id}
+            itemName={topic.name}
+            redirectPath={`/${disciplineSlug}/${subjectSlug}`}
+            canDelete={canManage}
+          />
         </div>
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-          {topic.name}
-        </h2>
+        <Link href={`/${disciplineSlug}/${subjectSlug}/${topic.slug}`}>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+            {topic.name}
+          </h2>
+        </Link>
         {topic.description && (
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
             {topic.description}
@@ -36,11 +49,14 @@ function renderTopicCard(
         )}
       </div>
 
-      <div className="mt-6 flex items-center text-xs font-medium text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
+      <Link
+        href={`/${disciplineSlug}/${subjectSlug}/${topic.slug}`}
+        className="mt-6 flex items-center text-xs font-medium text-amber-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform"
+      >
         <span>Acessar material</span>
         <ArrowRight className="w-3.5 h-3.5 ml-1" />
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
 
@@ -60,6 +76,7 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
   }
 
   const topics = await catalog.listTopics(subject.id);
+  const canManage = Boolean(profile && ["admin", "writer"].includes(profile.role));
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
@@ -74,18 +91,30 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
           ]}
         />
 
-        <div className="my-8">
-          <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            Assunto
-          </span>
-          <h1 className="mt-1 text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
-            {subject.name}
-          </h1>
-          {subject.description && (
-            <p className="mt-2 text-base text-zinc-600 dark:text-zinc-400 max-w-2xl">
-              {subject.description}
-            </p>
-          )}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 my-8">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              Assunto
+            </span>
+            <h1 className="mt-1 text-3xl font-extrabold text-zinc-900 dark:text-zinc-50 tracking-tight">
+              {subject.name}
+            </h1>
+            {subject.description && (
+              <p className="mt-2 text-base text-zinc-600 dark:text-zinc-400 max-w-2xl">
+                {subject.description}
+              </p>
+            )}
+          </div>
+          <div>
+            <CreateItemModal
+              type="topic"
+              triggerLabel="+ Novo Tópico"
+              canCreate={canManage}
+              disciplineSlug={discipline.slug}
+              subjectId={subject.id}
+              subjectSlug={subject.slug}
+            />
+          </div>
         </div>
 
         {topics.length === 0 ? (
@@ -95,13 +124,13 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
               Nenhum tópico cadastrado neste assunto
             </h3>
             <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-              Crie tópicos associados a este assunto para disponibilizar materiais de estudo colaborativos.
+              Crie tópicos associados a este assunto no botão acima para disponibilizar materiais de estudo colaborativos.
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {topics.map((topic) =>
-              renderTopicCard(topic, discipline.slug, subject.slug),
+              renderTopicCard(topic, discipline.slug, subject.slug, canManage),
             )}
           </div>
         )}

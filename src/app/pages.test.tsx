@@ -309,6 +309,34 @@ describe("Server Component Pages", () => {
     ).toBeDefined();
   });
 
+  it("renders creation buttons for authorized writers across catalog pages", async () => {
+    vi.mocked(getCurrentUserProfile).mockResolvedValue({
+      id: "u-writer",
+      email: "writer@test.com",
+      full_name: "Writer User",
+      avatar_url: null,
+      role: "writer",
+      created_at: "",
+      updated_at: "",
+    });
+
+    const homeComp = await HomePage();
+    render(homeComp);
+    expect(screen.getByRole("button", { name: "+ Nova Disciplina" })).toBeDefined();
+
+    const discComp = await DisciplinePage({
+      params: Promise.resolve({ disciplineSlug: "matematica" }),
+    });
+    render(discComp);
+    expect(screen.getByRole("button", { name: "+ Novo Assunto" })).toBeDefined();
+
+    const subjComp = await SubjectPage({
+      params: Promise.resolve({ disciplineSlug: "matematica", subjectSlug: "calculo" }),
+    });
+    render(subjComp);
+    expect(screen.getByRole("button", { name: "+ Novo Tópico" })).toBeDefined();
+  });
+
   it("renders TopicPage empty state for unauthenticated visitor", async () => {
     fakeRepo.getMaterialByTopicId.mockResolvedValueOnce(null);
     vi.mocked(getCurrentUserProfile).mockResolvedValueOnce(null);
