@@ -231,7 +231,30 @@ describe("Server Component Pages", () => {
     expect(screen.getByText("Editar Material")).toBeDefined();
   });
 
-  it("renders TopicHistoryPage with revisions", async () => {
+  it("renders TopicHistoryPage with revisions and arbitrary comparator when 2+ revisions", async () => {
+    fakeRepo.listMaterialRevisions.mockResolvedValueOnce([
+      {
+        id: "r-2",
+        material_id: "m-1",
+        author_id: "u-1",
+        revision_number: 2,
+        content_markdown: "# Rev 2",
+        change_summary: "Segunda revisão",
+        created_at: "2026-09-15T00:00:00Z",
+        author: null,
+      },
+      {
+        id: "r-1",
+        material_id: "m-1",
+        author_id: "u-1",
+        revision_number: 1,
+        content_markdown: "# Rev 1",
+        change_summary: "Primeira revisão",
+        created_at: "2026-09-14T00:00:00Z",
+        author: null,
+      },
+    ]);
+
     const Component = await TopicHistoryPage({
       params: Promise.resolve({
         disciplineSlug: "matematica",
@@ -241,7 +264,7 @@ describe("Server Component Pages", () => {
     });
     render(Component);
     expect(screen.getByText("Histórico • Limites")).toBeDefined();
-    expect(screen.getByText("Versão inicial")).toBeDefined();
+    expect(screen.getByText("Comparação Arbitrária de Versões")).toBeDefined();
   });
 
   it("renders TopicHistoryPage empty state when no revisions", async () => {

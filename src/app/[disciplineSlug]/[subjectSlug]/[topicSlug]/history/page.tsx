@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { DiffViewer } from "@/components/diff/DiffViewer";
 import { RestoreRevisionButton } from "@/components/history/RestoreRevisionButton";
+import { ArbitraryRevisionComparator } from "@/components/history/ArbitraryRevisionComparator";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
 import { MaterialRevisionWithAuthor } from "@/types/database";
@@ -188,6 +189,9 @@ export default async function TopicHistoryPage({ params }: HistoryPageProps) {
           </div>
         ) : (
           <div className="space-y-6">
+            {revisions.length >= 2 && (
+              <ArbitraryRevisionComparator revisions={revisions} />
+            )}
             {revisions.map((rev, index) =>
               renderRevisionCard(rev, index, revisions, cardContext),
             )}
