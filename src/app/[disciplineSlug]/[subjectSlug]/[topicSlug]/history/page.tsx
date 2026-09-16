@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { DiffViewer } from "@/components/diff/DiffViewer";
@@ -49,9 +50,12 @@ function renderRevisionCard(
 
         <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
           {rev.author?.avatar_url ? (
-            <img
+            <Image
               src={rev.author.avatar_url}
               alt={rev.author.full_name}
+              width={20}
+              height={20}
+              unoptimized
               className="w-5 h-5 rounded-full object-cover"
             />
           ) : (

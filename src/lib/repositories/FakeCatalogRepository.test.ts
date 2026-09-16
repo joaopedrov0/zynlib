@@ -76,4 +76,64 @@ describe("FakeCatalogRepository", () => {
     expect(topics).toHaveLength(1);
     expect(topics[0].slug).toBe("arvores-avl");
   });
+
+  it("finds subject and topic by slug or returns null", async () => {
+    const repository = new FakeCatalogRepository(
+      [sampleDiscipline],
+      [sampleSubject],
+      [sampleTopic],
+    );
+
+    const subj = await repository.getSubjectBySlug("disc-1", "estruturas-de-dados");
+    expect(subj?.name).toBe("Estruturas de Dados");
+
+    const missingSubj = await repository.getSubjectBySlug("disc-1", "inexistente");
+    expect(missingSubj).toBeNull();
+
+    const topic = await repository.getTopicBySlug("subj-1", "arvores-avl");
+    expect(topic?.name).toBe("Árvores AVL");
+
+    const missingTopic = await repository.getTopicBySlug("subj-1", "inexistente");
+    expect(missingTopic).toBeNull();
+  });
+
+  it("handles materials and revisions", async () => {
+    const sampleMaterial = {
+      id: "mat-1",
+      topic_id: "topic-1",
+      current_revision_id: "rev-1",
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-01T00:00:00Z",
+      current_revision: null,
+    };
+
+    const sampleRevision = {
+      id: "rev-1",
+      material_id: "mat-1",
+      author_id: "u-1",
+      revision_number: 1,
+      content_markdown: "# Conteúdo",
+      change_summary: "Inicial",
+      created_at: "2026-01-01T00:00:00Z",
+      author: null,
+    };
+
+    const repository = new FakeCatalogRepository(
+      [sampleDiscipline],
+      [sampleSubject],
+      [sampleTopic],
+      [sampleMaterial],
+      [sampleRevision],
+    );
+
+    const mat = await repository.getMaterialByTopicId("topic-1");
+    expect(mat?.id).toBe("mat-1");
+
+    const missingMat = await repository.getMaterialByTopicId("inexistente");
+    expect(missingMat).toBeNull();
+
+    const revs = await repository.listMaterialRevisions("mat-1");
+    expect(revs).toHaveLength(1);
+    expect(revs[0].revision_number).toBe(1);
+  });
 });

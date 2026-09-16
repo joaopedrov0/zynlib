@@ -34,4 +34,26 @@ describe("MarkdownView Component", () => {
     const katexNodes = container.querySelectorAll(".katex");
     expect(katexNodes.length).toBeGreaterThan(0);
   });
+
+  it("renders blockquotes, ordered lists, inline code and code blocks", () => {
+    const markdown = [
+      "> Esta é uma citação importante",
+      "",
+      "1. Primeiro passo",
+      "2. Segundo passo",
+      "",
+      "Texto com `codigo_inline` e bloco:",
+      "",
+      "```typescript",
+      "const zyn = 42;",
+      "```",
+    ].join("\n");
+
+    render(<MarkdownView content={markdown} />);
+    expect(screen.getByText("Esta é uma citação importante")).toBeDefined();
+    expect(screen.getByText("Primeiro passo")).toBeDefined();
+    expect(screen.getByText("Segundo passo")).toBeDefined();
+    expect(screen.getByText("codigo_inline")).toBeDefined();
+    expect(screen.getByText(/const zyn = 42;/)).toBeDefined();
+  });
 });

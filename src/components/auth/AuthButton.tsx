@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { UserProfile } from "@/types/database";
 import { LogIn, LogOut, User as UserIcon } from "lucide-react";
@@ -99,9 +100,12 @@ export function AuthButton({ initialProfile = null }: AuthButtonProps) {
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
           {profile.avatar_url ? (
-            <img
+            <Image
               src={profile.avatar_url}
               alt={profile.full_name}
+              width={32}
+              height={32}
+              unoptimized
               className="w-8 h-8 rounded-full border border-zinc-200 dark:border-zinc-700 object-cover"
             />
           ) : (

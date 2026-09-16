@@ -8,6 +8,22 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: [],
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "json", "html"],
+      include: ["src/**"],
+      exclude: [
+        "src/types/**",
+        "**/*.d.ts",
+        "**/*.test.{ts,tsx}",
+      ],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90,
+      },
+    },
   },
   resolve: {
     alias: {
