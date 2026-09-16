@@ -3,6 +3,7 @@ import Image from "next/image";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { DiffViewer } from "@/components/diff/DiffViewer";
+import { RestoreRevisionButton } from "@/components/history/RestoreRevisionButton";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
 import { MaterialRevisionWithAuthor } from "@/types/database";
@@ -24,10 +25,20 @@ function resolvePreviousContent(
   return previousRevision ? previousRevision.content_markdown : "";
 }
 
+interface RevisionCardContext {
+  topicId: string;
+  disciplineSlug: string;
+  subjectSlug: string;
+  topicSlug: string;
+  currentRevisionId: string | null;
+  canRestore: boolean;
+}
+
 function renderRevisionCard(
   rev: MaterialRevisionWithAuthor,
   index: number,
   allRevisions: MaterialRevisionWithAuthor[],
+  context: RevisionCardContext,
 ) {
   const previousContent = resolvePreviousContent(allRevisions, index);
   const previousRevNumber = allRevisions[index + 1]?.revision_number;
@@ -48,20 +59,33 @@ function renderRevisionCard(
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
-          {rev.author?.avatar_url ? (
-            <Image
-              src={rev.author.avatar_url}
-              alt={rev.author.full_name}
-              width={20}
-              height={20}
-              unoptimized
-              className="w-5 h-5 rounded-full object-cover"
-            />
-          ) : (
-            <UserIcon className="w-3.5 h-3.5 text-zinc-400" />
-          )}
-          <span>{rev.author?.full_name ?? "Autor anônimo"}</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+            {rev.author?.avatar_url ? (
+              <Image
+                src={rev.author.avatar_url}
+                alt={rev.author.full_name}
+                width={20}
+                height={20}
+                unoptimized
+                className="w-5 h-5 rounded-full object-cover"
+              />
+            ) : (
+              <UserIcon className="w-3.5 h-3.5 text-zinc-400" />
+            )}
+            <span>{rev.author?.full_name ?? "Autor anônimo"}</span>
+          </div>
+
+          <RestoreRevisionButton
+            topicId={context.topicId}
+            disciplineSlug={context.disciplineSlug}
+            subjectSlug={context.subjectSlug}
+            topicSlug={context.topicSlug}
+            targetRevisionId={rev.id}
+            targetRevisionNumber={rev.revision_number}
+            isCurrentRevision={rev.id === context.currentRevisionId}
+            canRestore={context.canRestore}
+          />
         </div>
       </div>
 
@@ -106,6 +130,18 @@ export default async function TopicHistoryPage({ params }: HistoryPageProps) {
   const revisions = material
     ? await catalog.listMaterialRevisions(material.id)
     : [];
+
+  const canRestore = Boolean(
+    profile && ["admin", "writer"].includes(profile.role),
+  );
+  const cardContext: RevisionCardContext = {
+    topicId: topic.id,
+    disciplineSlug,
+    subjectSlug,
+    topicSlug,
+    currentRevisionId: material?.current_revision_id ?? null,
+    canRestore,
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
@@ -153,7 +189,7 @@ export default async function TopicHistoryPage({ params }: HistoryPageProps) {
         ) : (
           <div className="space-y-6">
             {revisions.map((rev, index) =>
-              renderRevisionCard(rev, index, revisions),
+              renderRevisionCard(rev, index, revisions, cardContext),
             )}
           </div>
         )}
