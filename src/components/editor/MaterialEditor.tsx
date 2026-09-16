@@ -88,6 +88,7 @@ export function MaterialEditor({
           topicSlug,
           contentMarkdown: content,
           changeSummary: summary,
+          baseRevisionNumber: currentRevisionNumber,
         });
       } catch (error) {
         if (error instanceof Error) {

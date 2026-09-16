@@ -5,6 +5,7 @@ import {
   computeNextRevisionNumber,
   insertAuditedRevision,
   pointMaterialToRevision,
+  assertNoRevisionConflict,
 } from "./materialRevisionOperations";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -202,6 +203,55 @@ describe("materialRevisionOperations", () => {
       await pointMaterialToRevision(supabase, "mat-1", "rev-10");
       expect(updateMock).toHaveBeenCalled();
       expect(eqMock).toHaveBeenCalledWith("id", "mat-1");
+    });
+  });
+
+  describe("assertNoRevisionConflict", () => {
+    it("does nothing when baseRevisionNumber is null or undefined", async () => {
+      const supabase = makeSupabaseMock({
+        from: vi.fn(),
+      });
+
+      await expect(
+        assertNoRevisionConflict(supabase, "mat-1", null)
+      ).resolves.toBeUndefined();
+      await expect(
+        assertNoRevisionConflict(supabase, "mat-1", undefined)
+      ).resolves.toBeUndefined();
+    });
+
+    it("does not throw when database revision number equals base", async () => {
+      const supabase = makeSupabaseMock({
+        from: vi.fn(() => ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { revision_number: 3 } }),
+        })),
+      });
+
+      await expect(
+        assertNoRevisionConflict(supabase, "mat-1", 3)
+      ).resolves.toBeUndefined();
+    });
+
+    it("throws error when database has newer revision than base", async () => {
+      const supabase = makeSupabaseMock({
+        from: vi.fn(() => ({
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          order: vi.fn().mockReturnThis(),
+          limit: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { revision_number: 5 } }),
+        })),
+      });
+
+      await expect(
+        assertNoRevisionConflict(supabase, "mat-1", 3)
+      ).rejects.toThrow(
+        "Conflito de concorrência: A versão atual no banco é #5, mas sua edição foi baseada na versão #3."
+      );
     });
   });
 });

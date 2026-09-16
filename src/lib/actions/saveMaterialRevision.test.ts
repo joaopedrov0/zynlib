@@ -297,4 +297,52 @@ describe("saveMaterialRevision Action", () => {
       })
     ).rejects.toThrow("Erro ao inicializar material");
   });
+
+  it("throws conflict error when baseRevisionNumber is older than latest in db", async () => {
+    vi.mocked(getSupabaseServerClient).mockResolvedValue(
+      makeSupabaseMock({
+        auth: {
+          getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u-writer" } } }),
+        },
+        from: vi.fn((table: string) => {
+          if (table === "profiles") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({ data: { id: "u-writer", role: "writer" } }),
+            };
+          }
+          if (table === "materials") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({ data: { id: "m1" } }),
+            };
+          }
+          if (table === "material_revisions") {
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              order: vi.fn().mockReturnThis(),
+              limit: vi.fn().mockReturnThis(),
+              maybeSingle: vi.fn().mockResolvedValue({ data: { revision_number: 4 } }),
+            };
+          }
+          return {};
+        }),
+      })
+    );
+
+    await expect(
+      saveMaterialRevision({
+        topicId: "t1",
+        disciplineSlug: "disc",
+        subjectSlug: "subj",
+        topicSlug: "top",
+        contentMarkdown: "Tentativa concorrente",
+        changeSummary: "Minha versão",
+        baseRevisionNumber: 2,
+      })
+    ).rejects.toThrow("Conflito de concorrência");
+  });
 });

@@ -133,3 +133,31 @@ export async function pointMaterialToRevision(
     })
     .eq("id", materialId);
 }
+
+/**
+ * Asserts that no concurrent revision has been published beyond base revision number.
+ *
+ * @example
+ * await assertNoRevisionConflict(supabase, "mat-1", 2);
+ */
+export async function assertNoRevisionConflict(
+  supabase: SupabaseClient,
+  materialId: string,
+  baseRevisionNumber?: number | null,
+): Promise<void> {
+  if (baseRevisionNumber === undefined || baseRevisionNumber === null) return;
+
+  const { data } = await supabase
+    .from("material_revisions")
+    .select("revision_number")
+    .eq("material_id", materialId)
+    .order("revision_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (data && data.revision_number > baseRevisionNumber) {
+    throw new Error(
+      `Conflito de concorrência: A versão atual no banco é #${data.revision_number}, mas sua edição foi baseada na versão #${baseRevisionNumber}.`,
+    );
+  }
+}

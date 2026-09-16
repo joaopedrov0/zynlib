@@ -9,6 +9,7 @@ import {
   computeNextRevisionNumber,
   insertAuditedRevision,
   pointMaterialToRevision,
+  assertNoRevisionConflict,
 } from "./materialRevisionOperations";
 
 export interface SaveRevisionPayload {
@@ -18,6 +19,7 @@ export interface SaveRevisionPayload {
   topicSlug: string;
   contentMarkdown: string;
   changeSummary: string;
+  baseRevisionNumber?: number | null;
 }
 
 function validateRevisionContent(contentMarkdown: string, changeSummary: string) {
@@ -33,7 +35,7 @@ function validateRevisionContent(contentMarkdown: string, changeSummary: string)
 }
 
 /**
- * Saves a new revision of a topic's canonical material.
+ * Saves a new revision of a topic's canonical material with optimistic locking check.
  *
  * @example
  * await saveMaterialRevision({ topicId: "t1", ... });
@@ -47,6 +49,7 @@ export async function saveMaterialRevision(payload: SaveRevisionPayload) {
   );
 
   const materialId = await getOrCreateTopicMaterial(supabase, payload.topicId);
+  await assertNoRevisionConflict(supabase, materialId, payload.baseRevisionNumber);
   const nextNumber = await computeNextRevisionNumber(supabase, materialId);
   const revisionId = await insertAuditedRevision(supabase, {
     materialId,

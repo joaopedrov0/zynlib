@@ -201,4 +201,37 @@ describe("MaterialEditor Component", () => {
       })
     );
   });
+
+  it("passes baseRevisionNumber and handles concurrency conflict error", async () => {
+    vi.mocked(saveMaterialRevision).mockRejectedValueOnce(
+      new Error("Conflito de concorrência: A versão atual no banco é #5, mas sua edição foi baseada na versão #3.")
+    );
+
+    render(
+      <MaterialEditor
+        topicId="t1"
+        disciplineSlug="comp"
+        subjectSlug="ed"
+        topicSlug="arvores"
+        initialContent="Texto"
+        currentRevisionNumber={3}
+      />
+    );
+
+    const summaryInput = screen.getByPlaceholderText(/Ex: Adicionada explicação/);
+    fireEvent.change(summaryInput, { target: { value: "Tentativa" } });
+
+    const submitBtn = screen.getByText("Publicar Nova Revisão");
+    fireEvent.click(submitBtn);
+
+    expect(saveMaterialRevision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        baseRevisionNumber: 3,
+      })
+    );
+
+    expect(
+      await screen.findByText(/Conflito de concorrência/i)
+    ).toBeDefined();
+  });
 });
