@@ -7,6 +7,7 @@ import {
 import {
   CatalogRepository,
   MaterialWithRevision,
+  SearchResultItem,
 } from "./CatalogRepository";
 
 /**
@@ -87,5 +88,34 @@ export class FakeCatalogRepository implements CatalogRepository {
     materialId: string,
   ): Promise<MaterialRevisionWithAuthor[]> {
     return this.revisions.filter((item) => item.material_id === materialId);
+  }
+
+  async searchCatalog(query: string): Promise<SearchResultItem[]> {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const results: SearchResultItem[] = [];
+
+    for (const d of this.disciplines) {
+      if (d.name.toLowerCase().includes(q) || d.description?.toLowerCase().includes(q)) {
+        results.push({ id: d.id, type: "discipline", title: d.name, description: d.description, href: `/${d.slug}` });
+      }
+    }
+
+    for (const s of this.subjects) {
+      const disc = this.disciplines.find((d) => d.id === s.discipline_id);
+      if (s.name.toLowerCase().includes(q) || s.description?.toLowerCase().includes(q)) {
+        results.push({ id: s.id, type: "subject", title: s.name, description: s.description, href: `/${disc?.slug ?? ""}/${s.slug}` });
+      }
+    }
+
+    for (const t of this.topics) {
+      const s = this.subjects.find((subj) => subj.id === t.subject_id);
+      const disc = this.disciplines.find((d) => d.id === s?.discipline_id);
+      if (t.name.toLowerCase().includes(q) || t.description?.toLowerCase().includes(q)) {
+        results.push({ id: t.id, type: "topic", title: t.name, description: t.description, href: `/${disc?.slug ?? ""}/${s?.slug ?? ""}/${t.slug}` });
+      }
+    }
+
+    return results;
   }
 }

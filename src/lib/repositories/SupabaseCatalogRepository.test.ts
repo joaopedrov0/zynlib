@@ -30,6 +30,14 @@ class FakeSupabaseQueryBuilder {
     return this;
   }
 
+  ilike() {
+    return this;
+  }
+
+  limit() {
+    return this;
+  }
+
   async maybeSingle() {
     if (this.shouldFail) {
       return { data: null, error: { message: "Query failed", code: "PGRST001" } };
@@ -158,5 +166,16 @@ describe("SupabaseCatalogRepository", () => {
     vi.mocked(getSupabaseServerClient).mockResolvedValue(new FakeSupabaseClient().asClient());
     const repo = await getCatalogRepository();
     expect(repo).toBeInstanceOf(SupabaseCatalogRepository);
+  });
+
+  it("searches catalog across disciplines, subjects, and topics", async () => {
+    const fakeClient = new FakeSupabaseClient().asClient();
+    const repo = new SupabaseCatalogRepository(fakeClient);
+
+    const empty = await repo.searchCatalog("   ");
+    expect(empty).toEqual([]);
+
+    const results = await repo.searchCatalog("calculo");
+    expect(results.length).toBeGreaterThan(0);
   });
 });

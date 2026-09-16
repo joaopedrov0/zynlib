@@ -8,6 +8,7 @@ import {
 import {
   CatalogRepository,
   MaterialWithRevision,
+  SearchResultItem,
 } from "./CatalogRepository";
 
 /**
@@ -179,5 +180,39 @@ export class SupabaseCatalogRepository implements CatalogRepository {
     }
 
     return (data as unknown as MaterialRevisionWithAuthor[]) ?? [];
+  }
+
+  async searchCatalog(query: string): Promise<SearchResultItem[]> {
+    const trimmed = query.trim();
+    if (!trimmed) return [];
+
+    const pattern = `%${trimmed}%`;
+    const [disciplines, subjects, topics] = await Promise.all([
+      this.client.from("disciplines").select("id, name, slug, description").ilike("name", pattern).limit(8),
+      this.client.from("subjects").select("id, name, slug, description, disciplines!discipline_id(slug)").ilike("name", pattern).limit(8),
+      this.client.from("topics").select("id, name, slug, description, subjects!subject_id(slug, disciplines!discipline_id(slug))").ilike("name", pattern).limit(8),
+    ]);
+
+    const results: SearchResultItem[] = [];
+    if (disciplines.data) {
+      for (const d of disciplines.data) {
+        results.push({ id: d.id, type: "discipline", title: d.name, description: d.description, href: `/${d.slug}` });
+      }
+    }
+    if (subjects.data) {
+      for (const s of subjects.data) {
+        const discSlug = (s.disciplines as unknown as { slug: string })?.slug ?? "";
+        results.push({ id: s.id, type: "subject", title: s.name, description: s.description, href: `/${discSlug}/${s.slug}` });
+      }
+    }
+    if (topics.data) {
+      for (const t of topics.data) {
+        const subj = t.subjects as unknown as { slug: string; disciplines: { slug: string } };
+        const discSlug = subj?.disciplines?.slug ?? "";
+        const subjSlug = subj?.slug ?? "";
+        results.push({ id: t.id, type: "topic", title: t.name, description: t.description, href: `/${discSlug}/${subjSlug}/${t.slug}` });
+      }
+    }
+    return results;
   }
 }

@@ -11,6 +11,14 @@ export interface MaterialWithRevision extends MaterialRecord {
   current_revision: MaterialRevisionRecord | null;
 }
 
+export interface SearchResultItem {
+  id: string;
+  type: "discipline" | "subject" | "topic";
+  title: string;
+  description?: string | null;
+  href: string;
+}
+
 export interface CatalogRepository {
   listDisciplines(): Promise<DisciplineRecord[]>;
   getDisciplineBySlug(slug: string): Promise<DisciplineRecord | null>;
@@ -25,4 +33,5 @@ export interface CatalogRepository {
   listMaterialRevisions(
     materialId: string,
   ): Promise<MaterialRevisionWithAuthor[]>;
+  searchCatalog(query: string): Promise<SearchResultItem[]>;
 }

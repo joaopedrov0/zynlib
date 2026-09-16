@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { AuthButton } from "@/components/auth/AuthButton";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { UserProfile } from "@/types/database";
 
 interface AppHeaderProps {
@@ -8,20 +9,18 @@ interface AppHeaderProps {
 }
 
 /**
- * Cabeçalho global do Zyn Library contendo identificação da marca e ações de autenticação.
+ * Cabeçalho global do Zyn Library contendo identificação da marca, busca global e autenticação.
  *
- * Exemplo de uso:
- * ```tsx
+ * @example
  * <AppHeader currentUserProfile={userProfile} />
- * ```
  */
 export function AppHeader({ currentUserProfile }: AppHeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <Link
           href="/"
-          className="flex items-center gap-2.5 group transition-opacity hover:opacity-90"
+          className="flex items-center gap-2.5 group transition-opacity hover:opacity-90 shrink-0"
         >
           <div className="w-9 h-9 rounded-lg bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white shadow-sm shadow-indigo-500/20">
             <BookOpen className="w-5 h-5" />
@@ -35,6 +34,10 @@ export function AppHeader({ currentUserProfile }: AppHeaderProps) {
             </span>
           </div>
         </Link>
+
+        <div className="flex-1 max-w-sm hidden sm:block">
+          <GlobalSearch />
+        </div>
 
         <div className="flex items-center gap-4">
           <AuthButton initialProfile={currentUserProfile} />

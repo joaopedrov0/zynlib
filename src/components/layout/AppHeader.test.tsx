@@ -4,11 +4,12 @@ import { AppHeader } from "./AppHeader";
 import { UserProfile } from "@/types/database";
 
 describe("AppHeader Component", () => {
-  it("renders branding title and subtitle", () => {
+  it("renders branding title, subtitle and search input", () => {
     render(<AppHeader />);
 
     expect(screen.getByText("Zyn Library")).toBeDefined();
     expect(screen.getByText("Base de Conhecimento Aberta")).toBeDefined();
+    expect(screen.getByPlaceholderText(/Buscar no catálogo.../i)).toBeDefined();
   });
 
   it("passes profile to auth button correctly", () => {

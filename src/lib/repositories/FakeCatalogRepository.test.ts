@@ -132,8 +132,35 @@ describe("FakeCatalogRepository", () => {
     const missingMat = await repository.getMaterialByTopicId("inexistente");
     expect(missingMat).toBeNull();
 
-    const revs = await repository.listMaterialRevisions("mat-1");
-    expect(revs).toHaveLength(1);
-    expect(revs[0].revision_number).toBe(1);
+    const revisions = await repository.listMaterialRevisions("mat-1");
+    expect(revisions).toHaveLength(1);
+    expect(revisions[0].author_id).toBe("u-1");
+  });
+
+  it("searches catalog matching disciplines, subjects, and topics", async () => {
+    const repository = new FakeCatalogRepository(
+      [sampleDiscipline],
+      [sampleSubject],
+      [sampleTopic],
+    );
+
+    const emptyResults = await repository.searchCatalog("   ");
+    expect(emptyResults).toEqual([]);
+
+    const discResults = await repository.searchCatalog("computação");
+    expect(discResults).toHaveLength(1);
+    expect(discResults[0].type).toBe("discipline");
+    expect(discResults[0].href).toBe("/ciencia-da-computacao");
+
+    const subjResults = await repository.searchCatalog("estruturas");
+    expect(subjResults).toHaveLength(1);
+    expect(subjResults[0].type).toBe("subject");
+
+    const topicResults = await repository.searchCatalog("AVL");
+    expect(topicResults).toHaveLength(1);
+    expect(topicResults[0].type).toBe("topic");
+    expect(topicResults[0].href).toBe(
+      "/ciencia-da-computacao/estruturas-de-dados/arvores-avl",
+    );
   });
 });
