@@ -101,7 +101,7 @@ export default async function DisciplinePage({ params }: DisciplinePageProps) {
           <div>
             <CreateItemModal
               type="subject"
-              triggerLabel="+ Novo Assunto"
+              triggerLabel="Novo Assunto"
               canCreate={canManage}
               disciplineId={discipline.id}
               disciplineSlug={discipline.slug}

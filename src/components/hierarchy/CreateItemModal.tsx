@@ -56,11 +56,15 @@ async function executeCreation(
   }
 }
 
+function sanitizeTriggerLabel(rawLabel: string): string {
+  return rawLabel.replace(/^\+\s*/, "").trim();
+}
+
 /**
  * Modal dialog component for creating disciplines, subjects, or topics.
  *
  * @example
- * <CreateItemModal type="discipline" triggerLabel="+ Nova Disciplina" canCreate={true} />
+ * <CreateItemModal type="discipline" triggerLabel="Nova Disciplina" canCreate={true} />
  */
 export function CreateItemModal(props: CreateItemModalProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -95,7 +99,7 @@ export function CreateItemModal(props: CreateItemModalProps) {
         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-xs cursor-pointer"
       >
         <Plus className="w-4 h-4" />
-        {props.triggerLabel}
+        {sanitizeTriggerLabel(props.triggerLabel)}
       </button>
     );
   }

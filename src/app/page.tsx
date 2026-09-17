@@ -83,7 +83,7 @@ export default async function HomePage() {
           <div>
             <CreateItemModal
               type="discipline"
-              triggerLabel="+ Nova Disciplina"
+              triggerLabel="Nova Disciplina"
               canCreate={canManage}
             />
           </div>

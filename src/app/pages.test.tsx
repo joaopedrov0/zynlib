@@ -322,19 +322,19 @@ describe("Server Component Pages", () => {
 
     const homeComp = await HomePage();
     render(homeComp);
-    expect(screen.getByRole("button", { name: "+ Nova Disciplina" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Nova Disciplina" })).toBeDefined();
 
     const discComp = await DisciplinePage({
       params: Promise.resolve({ disciplineSlug: "matematica" }),
     });
     render(discComp);
-    expect(screen.getByRole("button", { name: "+ Novo Assunto" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Novo Assunto" })).toBeDefined();
 
     const subjComp = await SubjectPage({
       params: Promise.resolve({ disciplineSlug: "matematica", subjectSlug: "calculo" }),
     });
     render(subjComp);
-    expect(screen.getByRole("button", { name: "+ Novo Tópico" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "Novo Tópico" })).toBeDefined();
   });
 
   it("renders TopicPage empty state for unauthenticated visitor", async () => {

@@ -18,14 +18,14 @@ describe("CreateItemModal Component", () => {
     const { container } = render(
       <CreateItemModal
         type="discipline"
-        triggerLabel="+ Nova Disciplina"
+        triggerLabel="Nova Disciplina"
         canCreate={false}
       />
     );
     expect(container.firstChild).toBeNull();
   });
 
-  it("opens modal and submits new discipline", async () => {
+  it("sanitizes leading plus sign from triggerLabel to prevent duplicate symbols", () => {
     render(
       <CreateItemModal
         type="discipline"
@@ -33,8 +33,20 @@ describe("CreateItemModal Component", () => {
         canCreate={true}
       />
     );
+    const button = screen.getByRole("button", { name: "Nova Disciplina" });
+    expect(button).toBeDefined();
+  });
 
-    const openBtn = screen.getByRole("button", { name: "+ Nova Disciplina" });
+  it("opens modal and submits new discipline", async () => {
+    render(
+      <CreateItemModal
+        type="discipline"
+        triggerLabel="Nova Disciplina"
+        canCreate={true}
+      />
+    );
+
+    const openBtn = screen.getByRole("button", { name: "Nova Disciplina" });
     fireEvent.click(openBtn);
 
     expect(screen.getByText("Criar Nova Disciplina")).toBeDefined();
@@ -58,14 +70,14 @@ describe("CreateItemModal Component", () => {
     render(
       <CreateItemModal
         type="subject"
-        triggerLabel="+ Novo Assunto"
+        triggerLabel="Novo Assunto"
         canCreate={true}
         disciplineId="d-1"
         disciplineSlug="quimica"
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Novo Assunto" }));
+    fireEvent.click(screen.getByRole("button", { name: "Novo Assunto" }));
     fireEvent.change(screen.getByLabelText(/Nome:/i), { target: { value: "Orgânica" } });
     fireEvent.click(screen.getByRole("button", { name: "Criar" }));
 
@@ -84,7 +96,7 @@ describe("CreateItemModal Component", () => {
     render(
       <CreateItemModal
         type="topic"
-        triggerLabel="+ Novo Tópico"
+        triggerLabel="Novo Tópico"
         canCreate={true}
         disciplineSlug="quimica"
         subjectId="s-1"
@@ -92,7 +104,7 @@ describe("CreateItemModal Component", () => {
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Novo Tópico" }));
+    fireEvent.click(screen.getByRole("button", { name: "Novo Tópico" }));
     fireEvent.change(screen.getByLabelText(/Nome:/i), { target: { value: "Hidrocarbonetos" } });
     fireEvent.click(screen.getByRole("button", { name: "Criar" }));
 
@@ -112,12 +124,12 @@ describe("CreateItemModal Component", () => {
     render(
       <CreateItemModal
         type="discipline"
-        triggerLabel="+ Nova Disciplina"
+        triggerLabel="Nova Disciplina"
         canCreate={true}
       />
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Nova Disciplina" }));
+    fireEvent.click(screen.getByRole("button", { name: "Nova Disciplina" }));
     expect(screen.getByText("Criar Nova Disciplina")).toBeDefined();
 
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));

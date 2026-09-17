@@ -108,7 +108,7 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
           <div>
             <CreateItemModal
               type="topic"
-              triggerLabel="+ Novo Tópico"
+              triggerLabel="Novo Tópico"
               canCreate={canManage}
               disciplineSlug={discipline.slug}
               subjectId={subject.id}
