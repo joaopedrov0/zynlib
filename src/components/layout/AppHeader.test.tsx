@@ -25,5 +25,23 @@ describe("AppHeader Component", () => {
 
     render(<AppHeader currentUserProfile={profile} />);
     expect(screen.getByText("Test User")).toBeDefined();
+    expect(screen.queryByRole("link", { name: /Painel Admin/i })).toBeNull();
+  });
+
+  it("renders link to admin panel when user is admin", () => {
+    const adminProfile: UserProfile = {
+      id: "u-admin",
+      email: "admin@example.com",
+      full_name: "Admin User",
+      avatar_url: null,
+      role: "admin",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    render(<AppHeader currentUserProfile={adminProfile} />);
+    const adminLink = screen.getByRole("link", { name: /Painel Admin/i });
+    expect(adminLink).toBeDefined();
+    expect(adminLink.getAttribute("href")).toBe("/admin");
   });
 });

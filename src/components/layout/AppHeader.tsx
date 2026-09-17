@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, Shield } from "lucide-react";
 import { AuthButton } from "@/components/auth/AuthButton";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { UserProfile } from "@/types/database";
@@ -39,7 +39,17 @@ export function AppHeader({ currentUserProfile }: AppHeaderProps) {
           <GlobalSearch />
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {currentUserProfile?.role === "admin" && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 transition"
+              aria-label="Painel Admin"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Painel Admin</span>
+            </Link>
+          )}
           <AuthButton initialProfile={currentUserProfile} />
         </div>
       </div>
