@@ -109,4 +109,21 @@ describe("GlobalSearch Component", () => {
     const topicLink = screen.getByText("Matrizes");
     fireEvent.click(topicLink);
   });
+
+  it("debounces rapid keystrokes to prevent excessive search action queries", async () => {
+    vi.mocked(searchActionModule.searchCatalogAction).mockResolvedValue([]);
+
+    render(<GlobalSearch />);
+    const input = screen.getByPlaceholderText(/Buscar no catálogo.../i);
+
+    fireEvent.change(input, { target: { value: "a" } });
+    fireEvent.change(input, { target: { value: "al" } });
+    fireEvent.change(input, { target: { value: "alg" } });
+
+    await waitFor(() => {
+      expect(searchActionModule.searchCatalogAction).toHaveBeenCalledWith("alg");
+    });
+
+    expect(searchActionModule.searchCatalogAction).toHaveBeenCalledTimes(1);
+  });
 });

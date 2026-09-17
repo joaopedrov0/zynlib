@@ -76,6 +76,19 @@ export function GlobalSearch() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    const timer = setTimeout(() => {
+      startTransition(async () => {
+        const found = await searchCatalogAction(trimmed);
+        setResults(found);
+      });
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const handleChange = (val: string) => {
     setQuery(val);
     if (!val.trim()) {
@@ -84,10 +97,6 @@ export function GlobalSearch() {
       return;
     }
     setIsOpen(true);
-    startTransition(async () => {
-      const found = await searchCatalogAction(val);
-      setResults(found);
-    });
   };
 
   const handleClear = () => {

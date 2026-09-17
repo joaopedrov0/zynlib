@@ -1,5 +1,6 @@
 -- 1. EXTENSÕES
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- 2. TABELA PROFILES (Público, espelha auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (
@@ -106,7 +107,20 @@ BEGIN
     END IF;
 END $$;
 
--- 8. ROW LEVEL SECURITY (RLS)
+-- 8. ÍNDICES DE PERFORMANCE E BUSCA
+-- Índices trigram (GIN) para aceleração de buscas textuais com ILIKE
+CREATE INDEX IF NOT EXISTS idx_disciplines_name_trgm ON public.disciplines USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_subjects_name_trgm ON public.subjects USING gin (name gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_topics_name_trgm ON public.topics USING gin (name gin_trgm_ops);
+
+-- Índices de chaves estrangeiras e ordenação frequente
+CREATE INDEX IF NOT EXISTS idx_subjects_discipline_id ON public.subjects(discipline_id);
+CREATE INDEX IF NOT EXISTS idx_topics_subject_id ON public.topics(subject_id);
+CREATE INDEX IF NOT EXISTS idx_materials_topic_id ON public.materials(topic_id);
+CREATE INDEX IF NOT EXISTS idx_material_revisions_material_id ON public.material_revisions(material_id);
+CREATE INDEX IF NOT EXISTS idx_material_revisions_created_at ON public.material_revisions(created_at DESC);
+
+-- 9. ROW LEVEL SECURITY (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.disciplines ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.subjects ENABLE ROW LEVEL SECURITY;
