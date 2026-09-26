@@ -10,6 +10,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "check": "npm run lint && npm test",
+    "publish-images": "tsx --env-file=.env.local scripts/publish-material-images.ts",
     "prepare": "node scripts/install-hooks.mjs"
   },
   "dependencies": {
@@ -41,6 +42,7 @@
     "eslint-config-next": "16.2.10",
     "jsdom": "^27.0.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^3.2.7"
   }

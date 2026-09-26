@@ -43,3 +43,8 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# conteúdo local (materiais da Zyn Library, pesquisa de estilo e fontes pessoais)
+/materiais/
+/devto_research/
+/writing_style/

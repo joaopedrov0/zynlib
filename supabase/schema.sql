@@ -180,3 +180,21 @@ CREATE POLICY "Escritores/Admins podem criar revisões" ON public.material_revis
         author_id = auth.uid() AND
         EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('admin', 'writer'))
     );
+
+-- 10. STORAGE: IMAGENS DOS MATERIAIS
+-- Bucket público: a Zyn Library exibe imagens por URL, sem upload próprio.
+-- Não há políticas de escrita em storage.objects de propósito: só o script
+-- `npm run publish-images` (service role, ignora RLS) grava aqui por enquanto.
+-- SVG fica de fora porque pode carregar scripts; limite de 5 MiB por imagem.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'material-images',
+    'material-images',
+    true,
+    5242880,
+    ARRAY['image/png', 'image/jpeg', 'image/gif', 'image/webp']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = EXCLUDED.public,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
