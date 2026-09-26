@@ -58,6 +58,15 @@ describe("MarkdownView Component", () => {
     expect(container.querySelector("pre code")?.textContent).toContain("const zyn = 42;");
   });
 
+  it("neutralizes outer margins of the first and last blocks inside blockquotes", () => {
+    // O mb-4 do último parágrafo somava-se ao py-2 e deixava a base com o triplo do topo
+    const { container } = render(<MarkdownView content={"> ### Título\n>\n> Parágrafo"} />);
+
+    const blockquoteClasses = container.querySelector("blockquote")?.className.split(" ");
+    expect(blockquoteClasses).toContain("[&>:first-child]:mt-0");
+    expect(blockquoteClasses).toContain("[&>:last-child]:mb-0");
+  });
+
   it("highlights code blocks by language and labels the language", () => {
     const markdown = "```python\ndef degrau(z):\n    return 1\n```";
     const { container } = render(<MarkdownView content={markdown} />);

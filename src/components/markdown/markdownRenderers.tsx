@@ -58,7 +58,8 @@ export const markdownRenderers: Components = {
   p: styled("p", "text-base text-zinc-700 dark:text-zinc-300 leading-relaxed mb-4"),
   ul: styled("ul", "list-disc list-inside space-y-1 text-zinc-700 dark:text-zinc-300 mb-4 pl-2"),
   ol: styled("ol", "list-decimal list-inside space-y-1 text-zinc-700 dark:text-zinc-300 mb-4 pl-2"),
-  blockquote: styled("blockquote", "border-l-4 border-indigo-500 pl-4 italic text-zinc-600 dark:text-zinc-400 my-4 bg-zinc-50 dark:bg-zinc-900/40 py-2 rounded-r"),
+  // As margens externas dos filhos (ex.: mb-4 do último <p>) somariam ao py-2; zerá-las deixa o padding simétrico.
+  blockquote: styled("blockquote", "border-l-4 border-indigo-500 pl-4 italic text-zinc-600 dark:text-zinc-400 my-4 bg-zinc-50 dark:bg-zinc-900/40 py-2 rounded-r [&>:first-child]:mt-0 [&>:last-child]:mb-0"),
   th: styled("th", "px-4 py-2.5 bg-zinc-50 dark:bg-zinc-900 text-left font-semibold text-zinc-800 dark:text-zinc-200"),
   td: styled("td", "px-4 py-2 border-t border-zinc-100 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300"),
   table: MarkdownTable,
