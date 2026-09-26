@@ -4,6 +4,7 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import rehypeHighlight from "rehype-highlight";
 import { markdownRenderers } from "./markdownRenderers";
+import { rehypeMarkBlockCode } from "./rehypeMarkBlockCode";
 import { rehypeSourceLines } from "./rehypeSourceLines";
 
 interface MarkdownViewProps {
@@ -12,7 +13,7 @@ interface MarkdownViewProps {
   withSourceLines?: boolean;
 }
 
-const BASE_REHYPE_PLUGINS = [rehypeKatex, rehypeHighlight];
+const BASE_REHYPE_PLUGINS = [rehypeKatex, rehypeHighlight, rehypeMarkBlockCode];
 const REHYPE_PLUGINS_WITH_SOURCE_LINES = [...BASE_REHYPE_PLUGINS, rehypeSourceLines];
 
 /**

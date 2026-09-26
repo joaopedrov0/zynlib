@@ -1,10 +1,7 @@
-import { ComponentPropsWithoutRef, createContext, useContext } from "react";
+import { ComponentPropsWithoutRef } from "react";
 import type { ExtraProps } from "react-markdown";
 import { readCodeLanguage } from "./markdownElementHelpers";
-
-// react-markdown não diz mais se um `code` é inline; quem está dentro de um `pre`
-// descobre por este contexto, o que também cobre blocos sem linguagem declarada.
-const InsideCodeBlock = createContext(false);
+import { BLOCK_CODE_CLASS } from "./rehypeMarkBlockCode";
 
 type PreProps = ComponentPropsWithoutRef<"pre"> & ExtraProps;
 type CodeProps = ComponentPropsWithoutRef<"code"> & ExtraProps;
@@ -32,14 +29,14 @@ export function MarkdownPre({ node, children, ...props }: PreProps) {
         </div>
       )}
       <pre {...props} className="p-4 overflow-x-auto text-xs sm:text-sm leading-relaxed">
-        <InsideCodeBlock.Provider value={true}>{children}</InsideCodeBlock.Provider>
+        {children}
       </pre>
     </div>
   );
 }
 
 /**
- * Código inline destacado, ou o conteúdo de um bloco quando está dentro de `MarkdownPre`.
+ * Código inline destacado, ou o conteúdo de um bloco quando marcado por `rehypeMarkBlockCode`.
  *
  * Exemplo de uso:
  * ```tsx
@@ -48,10 +45,9 @@ export function MarkdownPre({ node, children, ...props }: PreProps) {
  */
 export function MarkdownCode({ node, className, children, ...props }: CodeProps) {
   void node;
-  const insideBlock = useContext(InsideCodeBlock);
-  if (insideBlock) {
+  if (className?.split(" ").includes(BLOCK_CODE_CLASS)) {
     return (
-      <code {...props} className={`${className ?? ""} block font-mono text-zinc-100`}>
+      <code {...props} className={`${className} block font-mono text-zinc-100`}>
         {children}
       </code>
     );
