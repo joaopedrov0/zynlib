@@ -25,3 +25,60 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Realce de sintaxe (classes do highlight.js geradas pelo rehype-highlight).
+   Os blocos de código têm sempre fundo escuro, então um único tema serve aos dois modos. */
+.hljs-comment,
+.hljs-quote {
+  color: #8b949e;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-doctag,
+.hljs-template-tag {
+  color: #ff7b72;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-meta .hljs-string {
+  color: #a5d6ff;
+}
+.hljs-number,
+.hljs-literal,
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-meta,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id {
+  color: #79c0ff;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: #d2a8ff;
+}
+.hljs-built_in,
+.hljs-type,
+.hljs-title.class_,
+.hljs-symbol {
+  color: #ffa657;
+}
+.hljs-name,
+.hljs-selector-pseudo,
+.hljs-bullet,
+.hljs-addition {
+  color: #7ee787;
+}
+.hljs-deletion {
+  color: #ffa198;
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
