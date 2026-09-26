@@ -19,16 +19,31 @@ export interface SearchResultItem {
   href: string;
 }
 
+export interface SubjectPath {
+  discipline: DisciplineRecord;
+  subject: SubjectRecord;
+}
+
+export interface TopicPath extends SubjectPath {
+  topic: TopicRecord;
+}
+
 export interface CatalogRepository {
   listDisciplines(): Promise<DisciplineRecord[]>;
   getDisciplineBySlug(slug: string): Promise<DisciplineRecord | null>;
   listSubjects(disciplineId: string): Promise<SubjectRecord[]>;
-  getSubjectBySlug(
-    disciplineId: string,
-    slug: string,
-  ): Promise<SubjectRecord | null>;
+  /** Resolve disciplina + assunto a partir dos slugs da URL numa única consulta. */
+  getSubjectPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+  ): Promise<SubjectPath | null>;
   listTopics(subjectId: string): Promise<TopicRecord[]>;
-  getTopicBySlug(subjectId: string, slug: string): Promise<TopicRecord | null>;
+  /** Resolve disciplina + assunto + tópico a partir dos slugs da URL numa única consulta. */
+  getTopicPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+    topicSlug: string,
+  ): Promise<TopicPath | null>;
   getMaterialByTopicId(topicId: string): Promise<MaterialWithRevision | null>;
   listMaterialRevisions(
     materialId: string,

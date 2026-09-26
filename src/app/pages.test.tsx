@@ -85,12 +85,20 @@ describe("Server Component Pages", () => {
       slug === "matematica" ? Promise.resolve(fakeDiscipline) : Promise.resolve(null)
     ),
     listSubjects: vi.fn().mockResolvedValue([fakeSubject]),
-    getSubjectBySlug: vi.fn().mockImplementation((_id, slug) =>
-      slug === "calculo" ? Promise.resolve(fakeSubject) : Promise.resolve(null)
+    getSubjectPath: vi.fn().mockImplementation((disciplineSlug, subjectSlug) =>
+      Promise.resolve(
+        disciplineSlug === "matematica" && subjectSlug === "calculo"
+          ? { discipline: fakeDiscipline, subject: fakeSubject }
+          : null,
+      )
     ),
     listTopics: vi.fn().mockResolvedValue([fakeTopic]),
-    getTopicBySlug: vi.fn().mockImplementation((_id, slug) =>
-      slug === "limites" ? Promise.resolve(fakeTopic) : Promise.resolve(null)
+    getTopicPath: vi.fn().mockImplementation((disciplineSlug, subjectSlug, topicSlug) =>
+      Promise.resolve(
+        disciplineSlug === "matematica" && subjectSlug === "calculo" && topicSlug === "limites"
+          ? { discipline: fakeDiscipline, subject: fakeSubject, topic: fakeTopic }
+          : null,
+      )
     ),
     getMaterialByTopicId: vi.fn().mockResolvedValue(fakeMaterial),
     listMaterialRevisions: vi.fn().mockResolvedValue([fakeMaterial.current_revision]),
@@ -183,6 +191,20 @@ describe("Server Component Pages", () => {
       screen.getByText("Nenhum material publicado para este tópico ainda")
     ).toBeDefined();
     expect(screen.getByText("Criar primeira versão")).toBeDefined();
+  });
+
+  it("resolves the TopicPage URL with a single path lookup", async () => {
+    await TopicPage({
+      params: Promise.resolve({
+        disciplineSlug: "matematica",
+        subjectSlug: "calculo",
+        topicSlug: "limites",
+      }),
+    });
+
+    expect(fakeRepo.getTopicPath).toHaveBeenCalledTimes(1);
+    expect(fakeRepo.getTopicPath).toHaveBeenCalledWith("matematica", "calculo", "limites");
+    expect(fakeRepo.getDisciplineBySlug).not.toHaveBeenCalled();
   });
 
   it("calls notFound in TopicPage if topic is missing", async () => {

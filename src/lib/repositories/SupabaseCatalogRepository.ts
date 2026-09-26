@@ -9,7 +9,19 @@ import {
   CatalogRepository,
   MaterialWithRevision,
   SearchResultItem,
+  SubjectPath,
+  TopicPath,
 } from "./CatalogRepository";
+import {
+  SubjectPathRow,
+  TopicPathRow,
+  toSubjectPath,
+  toTopicPath,
+} from "./catalogPathRows";
+
+// `!inner` faz o filtro por `discipline.slug` descartar a linha pai quando
+// a disciplina não bate, em vez de só anular o objeto embutido.
+const EMBEDDED_DISCIPLINE = "discipline:disciplines!discipline_id!inner(*)";
 
 /**
  * Implementação do repositório de catálogo utilizando o Supabase como persistência.
@@ -73,23 +85,23 @@ export class SupabaseCatalogRepository implements CatalogRepository {
     return data ?? [];
   }
 
-  async getSubjectBySlug(
-    disciplineId: string,
-    slug: string,
-  ): Promise<SubjectRecord | null> {
+  async getSubjectPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+  ): Promise<SubjectPath | null> {
     const { data, error } = await this.client
       .from("subjects")
-      .select("*")
-      .eq("discipline_id", disciplineId)
-      .eq("slug", slug)
+      .select(`*, ${EMBEDDED_DISCIPLINE}`)
+      .eq("slug", subjectSlug)
+      .eq("discipline.slug", disciplineSlug)
       .maybeSingle();
 
     if (error) {
       throw new Error(
-        `Failed to get subject slug '${slug}' for discipline '${disciplineId}': ${error.message}`,
+        `Failed to get subject path '${disciplineSlug}/${subjectSlug}': ${error.message}`,
       );
     }
-    return data;
+    return data ? toSubjectPath(data as SubjectPathRow) : null;
   }
 
   async listTopics(subjectId: string): Promise<TopicRecord[]> {
@@ -108,23 +120,27 @@ export class SupabaseCatalogRepository implements CatalogRepository {
     return data ?? [];
   }
 
-  async getTopicBySlug(
-    subjectId: string,
-    slug: string,
-  ): Promise<TopicRecord | null> {
+  async getTopicPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+    topicSlug: string,
+  ): Promise<TopicPath | null> {
+    // Um único round trip substitui a cascata disciplina → assunto → tópico,
+    // que custava ~100 ms por consulta a cada navegação.
     const { data, error } = await this.client
       .from("topics")
-      .select("*")
-      .eq("subject_id", subjectId)
-      .eq("slug", slug)
+      .select(`*, subject:subjects!subject_id!inner(*, ${EMBEDDED_DISCIPLINE})`)
+      .eq("slug", topicSlug)
+      .eq("subject.slug", subjectSlug)
+      .eq("subject.discipline.slug", disciplineSlug)
       .maybeSingle();
 
     if (error) {
       throw new Error(
-        `Failed to get topic slug '${slug}' for subject '${subjectId}': ${error.message}`,
+        `Failed to get topic path '${disciplineSlug}/${subjectSlug}/${topicSlug}': ${error.message}`,
       );
     }
-    return data;
+    return data ? toTopicPath(data as TopicPathRow) : null;
   }
 
   async getMaterialByTopicId(

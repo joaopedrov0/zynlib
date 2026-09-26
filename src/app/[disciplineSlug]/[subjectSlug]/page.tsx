@@ -65,16 +65,12 @@ export default async function SubjectPage({ params }: SubjectPageProps) {
   const catalog = await getCatalogRepository();
   const profile = await getCurrentUserProfile();
 
-  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
-  if (!discipline) {
+  const subjectPath = await catalog.getSubjectPath(disciplineSlug, subjectSlug);
+  if (!subjectPath) {
     notFound();
   }
 
-  const subject = await catalog.getSubjectBySlug(discipline.id, subjectSlug);
-  if (!subject) {
-    notFound();
-  }
-
+  const { discipline, subject } = subjectPath;
   const topics = await catalog.listTopics(subject.id);
   const canManage = Boolean(profile && ["admin", "writer"].includes(profile.role));
 

@@ -118,15 +118,10 @@ export default async function TopicHistoryPage({ params }: HistoryPageProps) {
   const catalog = await getCatalogRepository();
   const profile = await getCurrentUserProfile();
 
-  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
-  if (!discipline) notFound();
+  const topicPath = await catalog.getTopicPath(disciplineSlug, subjectSlug, topicSlug);
+  if (!topicPath) notFound();
 
-  const subject = await catalog.getSubjectBySlug(discipline.id, subjectSlug);
-  if (!subject) notFound();
-
-  const topic = await catalog.getTopicBySlug(subject.id, topicSlug);
-  if (!topic) notFound();
-
+  const { discipline, subject, topic } = topicPath;
   const material = await catalog.getMaterialByTopicId(topic.id);
   const revisions = material
     ? await catalog.listMaterialRevisions(material.id)
