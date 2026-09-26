@@ -19,6 +19,11 @@ vi.mock("next/server", async (importOriginal) => {
   };
 });
 
+const fakeAuth = vi.hoisted(() => ({
+  getUser: vi.fn(async () => ({ data: { user: null } })),
+  getClaims: vi.fn(async () => ({ data: null, error: null })),
+}));
+
 vi.mock("@supabase/ssr", () => ({
   createBrowserClient: vi.fn(() => ({ browser: true })),
   createServerClient: vi.fn((_url, _key, options) => {
@@ -29,11 +34,7 @@ vi.mock("@supabase/ssr", () => ({
     if (options?.cookies?.setAll) {
       options.cookies.setAll([{ name: "test", value: "val", options: {} }]);
     }
-    return {
-      auth: {
-        getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-      },
-    };
+    return { auth: fakeAuth };
   }),
 }));
 
@@ -108,5 +109,15 @@ describe("Supabase Clients and Middleware", () => {
     const response = await middleware(request);
     expect(response).toBeDefined();
     expect(createServerClient).toHaveBeenCalled();
+  });
+
+  it("updateSession validates the session locally via getClaims instead of the Auth API", async () => {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+
+    await updateSession(new NextRequest("http://localhost:3000/teste"));
+
+    expect(fakeAuth.getClaims).toHaveBeenCalledTimes(1);
+    expect(fakeAuth.getUser).not.toHaveBeenCalled();
   });
 });

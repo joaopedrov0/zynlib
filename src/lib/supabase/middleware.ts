@@ -42,7 +42,10 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  // getClaims() renova o token expirado (gravando os cookies via setAll) e valida
+  // o JWT localmente com a JWKS do projeto (ES256). getUser() fazia uma ida ao
+  // /auth/v1/user em toda requisição, o maior custo fixo por navegação.
+  await supabase.auth.getClaims();
 
   return supabaseResponse;
 }
