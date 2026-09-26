@@ -92,10 +92,14 @@ describe("AuthButton Component", () => {
 
   it("handles auth state changes", async () => {
     render(<AuthButton initialProfile={null} />);
-    expect(authCallback).toBeDefined();
+    // toBeDefined() aceitava null; exigir o callback garante que houve inscrição.
+    const callback = authCallback;
+    if (!callback) {
+      throw new Error(`Expected onAuthStateChange to register a callback, got ${callback}`);
+    }
 
-    await authCallback("SIGNED_OUT", null);
-    await authCallback("SIGNED_IN", { user: { id: "u-session" } });
+    await callback("SIGNED_OUT", null);
+    await callback("SIGNED_IN", { user: { id: "u-session" } });
   });
 
   it("handles error during login and logout", async () => {
