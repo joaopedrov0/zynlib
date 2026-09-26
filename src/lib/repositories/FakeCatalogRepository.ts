@@ -8,6 +8,8 @@ import {
   CatalogRepository,
   MaterialWithRevision,
   SearchResultItem,
+  SubjectPath,
+  TopicPath,
 } from "./CatalogRepository";
 
 /**
@@ -53,28 +55,33 @@ export class FakeCatalogRepository implements CatalogRepository {
     return this.subjects.filter((item) => item.discipline_id === disciplineId);
   }
 
-  async getSubjectBySlug(
-    disciplineId: string,
-    slug: string,
-  ): Promise<SubjectRecord | null> {
-    const matched = this.subjects.find(
-      (item) => item.discipline_id === disciplineId && item.slug === slug,
+  async getSubjectPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+  ): Promise<SubjectPath | null> {
+    const discipline = await this.getDisciplineBySlug(disciplineSlug);
+    if (!discipline) return null;
+    const subject = this.subjects.find(
+      (item) => item.discipline_id === discipline.id && item.slug === subjectSlug,
     );
-    return matched ?? null;
+    return subject ? { discipline, subject } : null;
   }
 
   async listTopics(subjectId: string): Promise<TopicRecord[]> {
     return this.topics.filter((item) => item.subject_id === subjectId);
   }
 
-  async getTopicBySlug(
-    subjectId: string,
-    slug: string,
-  ): Promise<TopicRecord | null> {
-    const matched = this.topics.find(
-      (item) => item.subject_id === subjectId && item.slug === slug,
+  async getTopicPath(
+    disciplineSlug: string,
+    subjectSlug: string,
+    topicSlug: string,
+  ): Promise<TopicPath | null> {
+    const subjectPath = await this.getSubjectPath(disciplineSlug, subjectSlug);
+    if (!subjectPath) return null;
+    const topic = this.topics.find(
+      (item) => item.subject_id === subjectPath.subject.id && item.slug === topicSlug,
     );
-    return matched ?? null;
+    return topic ? { ...subjectPath, topic } : null;
   }
 
   async getMaterialByTopicId(

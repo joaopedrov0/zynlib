@@ -2,13 +2,53 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getCurrentUserProfile } from "./getCurrentUserProfile";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { UserProfile } from "@/types/database";
 
 vi.mock("@/lib/supabase/server", () => ({
   getSupabaseServerClient: vi.fn(),
 }));
 
-function makeSupabaseMock(mockData: unknown): SupabaseClient {
-  return mockData as unknown as SupabaseClient;
+interface FakeClaims {
+  sub: string;
+  email?: string;
+  user_metadata?: { full_name?: string; name?: string; avatar_url?: string };
+}
+
+/** Cliente Supabase em memória com sessão (JWT) e tabela `profiles`. */
+class FakeProfileSupabaseClient {
+  readonly getUser = vi.fn();
+  readonly upsert = vi.fn().mockResolvedValue({ error: null });
+  readonly auth: { getClaims: () => Promise<unknown>; getUser: () => Promise<unknown> };
+
+  constructor(
+    claims: FakeClaims | null,
+    private storedProfile: UserProfile | null = null,
+    claimsError: Error | null = null,
+  ) {
+    const data = claims ? { claims } : null;
+    this.auth = {
+      getClaims: async () => ({ data: claimsError ? null : data, error: claimsError }),
+      getUser: this.getUser,
+    };
+  }
+
+  from() {
+    return {
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: this.storedProfile }) }),
+      }),
+      upsert: this.upsert,
+    };
+  }
+
+  asClient(): SupabaseClient {
+    return this as unknown as SupabaseClient;
+  }
+}
+
+function useFakeClient(fake: FakeProfileSupabaseClient): FakeProfileSupabaseClient {
+  vi.mocked(getSupabaseServerClient).mockResolvedValue(fake.asClient());
+  return fake;
 }
 
 describe("getCurrentUserProfile", () => {
@@ -17,20 +57,21 @@ describe("getCurrentUserProfile", () => {
   });
 
   it("returns null when user is unauthenticated", async () => {
-    vi.mocked(getSupabaseServerClient).mockResolvedValue(
-      makeSupabaseMock({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
-        },
-      })
+    useFakeClient(new FakeProfileSupabaseClient(null));
+
+    expect(await getCurrentUserProfile()).toBeNull();
+  });
+
+  it("returns null when the session JWT cannot be verified", async () => {
+    useFakeClient(
+      new FakeProfileSupabaseClient({ sub: "u-1" }, null, new Error("invalid JWT")),
     );
 
-    const result = await getCurrentUserProfile();
-    expect(result).toBeNull();
+    expect(await getCurrentUserProfile()).toBeNull();
   });
 
   it("returns existing profile if found", async () => {
-    const existing = {
+    const existing: UserProfile = {
       id: "u-123",
       email: "user@test.com",
       full_name: "Existing User",
@@ -39,116 +80,53 @@ describe("getCurrentUserProfile", () => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+    useFakeClient(new FakeProfileSupabaseClient({ sub: "u-123" }, existing));
 
-    vi.mocked(getSupabaseServerClient).mockResolvedValue(
-      makeSupabaseMock({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({ data: { user: { id: "u-123" } } }),
-        },
-        from: vi.fn(() => ({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({ data: existing }),
-        })),
-      })
-    );
+    expect(await getCurrentUserProfile()).toEqual(existing);
+  });
 
-    const result = await getCurrentUserProfile();
-    expect(result).toEqual(existing);
+  it("identifies the user from verified JWT claims without calling the Auth API", async () => {
+    const fake = useFakeClient(new FakeProfileSupabaseClient({ sub: "u-123" }));
+
+    await getCurrentUserProfile();
+
+    expect(fake.getUser).not.toHaveBeenCalled();
   });
 
   it("auto-creates writer profile when record not found", async () => {
-    const upsertMock = vi.fn().mockResolvedValue({ error: null });
-
-    vi.mocked(getSupabaseServerClient).mockResolvedValue(
-      makeSupabaseMock({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: {
-              user: {
-                id: "u-new",
-                email: "novato@test.com",
-                user_metadata: { full_name: "Novato Silva" },
-              },
-            },
-          }),
-        },
-        from: vi.fn((table: string) => {
-          if (table === "profiles") {
-            return {
-              select: vi.fn().mockReturnThis(),
-              eq: vi.fn().mockReturnThis(),
-              maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-              upsert: upsertMock,
-            };
-          }
-          return {};
-        }),
-      })
+    const fake = useFakeClient(
+      new FakeProfileSupabaseClient({
+        sub: "u-new",
+        email: "novato@test.com",
+        user_metadata: { full_name: "Novato Silva" },
+      }),
     );
 
     const result = await getCurrentUserProfile();
+
+    expect(result?.id).toBe("u-new");
     expect(result?.full_name).toBe("Novato Silva");
     expect(result?.role).toBe("writer");
-    expect(upsertMock).toHaveBeenCalled();
+    expect(fake.upsert).toHaveBeenCalled();
   });
 
   it("handles metadata name fallback and email fallback", async () => {
-    vi.mocked(getSupabaseServerClient).mockResolvedValue(
-      makeSupabaseMock({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: {
-              user: {
-                id: "u-name",
-                email: "pedro@test.com",
-                user_metadata: { name: "Pedro Dev" },
-              },
-            },
-          }),
-        },
-        from: vi.fn(() => ({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-          upsert: vi.fn().mockResolvedValue({ error: null }),
-        })),
-      })
+    useFakeClient(
+      new FakeProfileSupabaseClient({
+        sub: "u-name",
+        email: "pedro@test.com",
+        user_metadata: { name: "Pedro Dev" },
+      }),
     );
+    expect((await getCurrentUserProfile())?.full_name).toBe("Pedro Dev");
 
-    const result = await getCurrentUserProfile();
-    expect(result?.full_name).toBe("Pedro Dev");
-
-    // Test email split fallback
-    vi.mocked(getSupabaseServerClient).mockResolvedValue(
-      makeSupabaseMock({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: {
-              user: {
-                id: "u-email",
-                email: "joao@test.com",
-              },
-            },
-          }),
-        },
-        from: vi.fn(() => ({
-          select: vi.fn().mockReturnThis(),
-          eq: vi.fn().mockReturnThis(),
-          maybeSingle: vi.fn().mockResolvedValue({ data: null }),
-          upsert: vi.fn().mockResolvedValue({ error: null }),
-        })),
-      })
-    );
-
-    const resultEmail = await getCurrentUserProfile();
-    expect(resultEmail?.full_name).toBe("joao");
+    useFakeClient(new FakeProfileSupabaseClient({ sub: "u-email", email: "joao@test.com" }));
+    expect((await getCurrentUserProfile())?.full_name).toBe("joao");
   });
 
   it("returns null on unexpected error", async () => {
     vi.mocked(getSupabaseServerClient).mockRejectedValue(new Error("DB failure"));
 
-    const result = await getCurrentUserProfile();
-    expect(result).toBeNull();
+    expect(await getCurrentUserProfile()).toBeNull();
   });
 });

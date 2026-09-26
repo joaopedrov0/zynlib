@@ -59,17 +59,26 @@ function renderSubjectCard(
   );
 }
 
+async function loadDisciplineWithSubjects(disciplineSlug: string) {
+  const catalog = await getCatalogRepository();
+  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
+  if (!discipline) return null;
+
+  const subjects = await catalog.listSubjects(discipline.id);
+  return { discipline, subjects };
+}
+
 export default async function DisciplinePage({ params }: DisciplinePageProps) {
   const { disciplineSlug } = await params;
-  const catalog = await getCatalogRepository();
-  const profile = await getCurrentUserProfile();
-
-  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
-  if (!discipline) {
+  const [profile, view] = await Promise.all([
+    getCurrentUserProfile(),
+    loadDisciplineWithSubjects(disciplineSlug),
+  ]);
+  if (!view) {
     notFound();
   }
 
-  const subjects = await catalog.listSubjects(discipline.id);
+  const { discipline, subjects } = view;
   const canManage = Boolean(profile && ["admin", "writer"].includes(profile.role));
 
   return (

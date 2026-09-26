@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { MaterialEditor } from "@/components/editor/MaterialEditor";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
+import { loadTopicWithMaterial } from "@/lib/repositories/loadTopicWithMaterial";
 
 interface EditTopicPageProps {
   params: Promise<{
@@ -14,25 +15,19 @@ interface EditTopicPageProps {
 }
 
 export default async function EditTopicPage({ params }: EditTopicPageProps) {
-  const { disciplineSlug, subjectSlug, topicSlug } = await params;
-  const profile = await getCurrentUserProfile();
+  const slugs = await params;
+  const { disciplineSlug, subjectSlug, topicSlug } = slugs;
+  const [profile, view] = await Promise.all([
+    getCurrentUserProfile(),
+    getCatalogRepository().then((catalog) => loadTopicWithMaterial(catalog, slugs)),
+  ]);
 
   if (!profile) {
     redirect(`/${disciplineSlug}/${subjectSlug}/${topicSlug}`);
   }
+  if (!view) notFound();
 
-  const catalog = await getCatalogRepository();
-
-  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
-  if (!discipline) notFound();
-
-  const subject = await catalog.getSubjectBySlug(discipline.id, subjectSlug);
-  if (!subject) notFound();
-
-  const topic = await catalog.getTopicBySlug(subject.id, topicSlug);
-  if (!topic) notFound();
-
-  const material = await catalog.getMaterialByTopicId(topic.id);
+  const { discipline, subject, topic, material } = view;
   const currentRevision = material?.current_revision;
 
   return (

@@ -77,23 +77,45 @@ describe("FakeCatalogRepository", () => {
     expect(topics[0].slug).toBe("arvores-avl");
   });
 
-  it("finds subject and topic by slug or returns null", async () => {
+  it("resolves a subject path by slugs or returns null", async () => {
+    const repository = new FakeCatalogRepository(
+      [sampleDiscipline],
+      [sampleSubject],
+    );
+
+    const path = await repository.getSubjectPath(
+      "ciencia-da-computacao",
+      "estruturas-de-dados",
+    );
+    expect(path).toEqual({ discipline: sampleDiscipline, subject: sampleSubject });
+
+    expect(await repository.getSubjectPath("inexistente", "estruturas-de-dados")).toBeNull();
+    expect(await repository.getSubjectPath("ciencia-da-computacao", "inexistente")).toBeNull();
+  });
+
+  it("resolves a topic path by slugs or returns null", async () => {
     const repository = new FakeCatalogRepository(
       [sampleDiscipline],
       [sampleSubject],
       [sampleTopic],
     );
 
-    const subj = await repository.getSubjectBySlug("disc-1", "estruturas-de-dados");
-    expect(subj?.name).toBe("Estruturas de Dados");
+    const path = await repository.getTopicPath(
+      "ciencia-da-computacao",
+      "estruturas-de-dados",
+      "arvores-avl",
+    );
+    expect(path).toEqual({
+      discipline: sampleDiscipline,
+      subject: sampleSubject,
+      topic: sampleTopic,
+    });
 
-    const missingSubj = await repository.getSubjectBySlug("disc-1", "inexistente");
-    expect(missingSubj).toBeNull();
-
-    const topic = await repository.getTopicBySlug("subj-1", "arvores-avl");
-    expect(topic?.name).toBe("Árvores AVL");
-
-    const missingTopic = await repository.getTopicBySlug("subj-1", "inexistente");
+    const missingTopic = await repository.getTopicPath(
+      "ciencia-da-computacao",
+      "estruturas-de-dados",
+      "inexistente",
+    );
     expect(missingTopic).toBeNull();
   });
 

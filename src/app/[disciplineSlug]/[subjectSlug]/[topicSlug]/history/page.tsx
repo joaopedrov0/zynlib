@@ -7,6 +7,10 @@ import { RestoreRevisionButton } from "@/components/history/RestoreRevisionButto
 import { ArbitraryRevisionComparator } from "@/components/history/ArbitraryRevisionComparator";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
+import {
+  loadTopicWithMaterial,
+  TopicSlugs,
+} from "@/lib/repositories/loadTopicWithMaterial";
 import { MaterialRevisionWithAuthor } from "@/types/database";
 import { History, GitCommit, User as UserIcon } from "lucide-react";
 
@@ -113,24 +117,27 @@ function renderRevisionCard(
   );
 }
 
-export default async function TopicHistoryPage({ params }: HistoryPageProps) {
-  const { disciplineSlug, subjectSlug, topicSlug } = await params;
+async function loadTopicHistory(slugs: TopicSlugs) {
   const catalog = await getCatalogRepository();
-  const profile = await getCurrentUserProfile();
+  const view = await loadTopicWithMaterial(catalog, slugs);
+  if (!view) return null;
 
-  const discipline = await catalog.getDisciplineBySlug(disciplineSlug);
-  if (!discipline) notFound();
-
-  const subject = await catalog.getSubjectBySlug(discipline.id, subjectSlug);
-  if (!subject) notFound();
-
-  const topic = await catalog.getTopicBySlug(subject.id, topicSlug);
-  if (!topic) notFound();
-
-  const material = await catalog.getMaterialByTopicId(topic.id);
-  const revisions = material
-    ? await catalog.listMaterialRevisions(material.id)
+  const revisions = view.material
+    ? await catalog.listMaterialRevisions(view.material.id)
     : [];
+  return { ...view, revisions };
+}
+
+export default async function TopicHistoryPage({ params }: HistoryPageProps) {
+  const slugs = await params;
+  const { disciplineSlug, subjectSlug, topicSlug } = slugs;
+  const [profile, history] = await Promise.all([
+    getCurrentUserProfile(),
+    loadTopicHistory(slugs),
+  ]);
+  if (!history) notFound();
+
+  const { discipline, subject, topic, material, revisions } = history;
 
   const canRestore = Boolean(
     profile && ["admin", "writer"].includes(profile.role),

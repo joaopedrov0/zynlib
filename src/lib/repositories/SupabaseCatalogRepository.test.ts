@@ -9,13 +9,23 @@ vi.mock("@/lib/supabase/server", () => ({
   getSupabaseServerClient: vi.fn(),
 }));
 
+const defaultSingleRow = { id: "item-1", name: "Sample", slug: "sample" };
+
+const sampleSubjectPathRow = {
+  id: "s1",
+  slug: "s-slug",
+  discipline: { id: "d1", slug: "d-slug" },
+};
+
 class FakeSupabaseQueryBuilder {
   private tableName: string;
   private shouldFail: boolean;
+  private singleRow: unknown;
 
-  constructor(tableName: string, shouldFail: boolean = false) {
+  constructor(tableName: string, shouldFail: boolean, singleRow: unknown) {
     this.tableName = tableName;
     this.shouldFail = shouldFail;
+    this.singleRow = singleRow;
   }
 
   select() {
@@ -42,7 +52,7 @@ class FakeSupabaseQueryBuilder {
     if (this.shouldFail) {
       return { data: null, error: { message: "Query failed", code: "PGRST001" } };
     }
-    return { data: { id: "item-1", name: "Sample", slug: "sample" }, error: null };
+    return { data: this.singleRow, error: null };
   }
 
   then(resolve: (val: unknown) => void) {
@@ -56,13 +66,15 @@ class FakeSupabaseQueryBuilder {
 
 class FakeSupabaseClient {
   private shouldFail: boolean;
+  private singleRow: unknown;
 
-  constructor(shouldFail: boolean = false) {
+  constructor(shouldFail: boolean = false, singleRow: unknown = defaultSingleRow) {
     this.shouldFail = shouldFail;
+    this.singleRow = singleRow;
   }
 
   from(table: string) {
-    return new FakeSupabaseQueryBuilder(table, this.shouldFail);
+    return new FakeSupabaseQueryBuilder(table, this.shouldFail, this.singleRow);
   }
 
   asClient(): SupabaseClient {
@@ -112,14 +124,22 @@ describe("SupabaseCatalogRepository", () => {
     await expect(failingRepo.listSubjects("d1")).rejects.toThrow("Failed to list subjects");
   });
 
-  it("gets subject by slug and throws on error", async () => {
-    const fakeClient = new FakeSupabaseClient().asClient();
+  it("resolves a subject path in one query and throws on error", async () => {
+    const fakeClient = new FakeSupabaseClient(false, sampleSubjectPathRow).asClient();
     const repo = new SupabaseCatalogRepository(fakeClient);
-    const subject = await repo.getSubjectBySlug("d1", "sample");
-    expect(subject?.name).toBe("Sample");
+    const path = await repo.getSubjectPath("d-slug", "s-slug");
+    expect(path?.discipline.id).toBe("d1");
+    expect(path?.subject.id).toBe("s1");
 
     const failingRepo = new SupabaseCatalogRepository(new FakeSupabaseClient(true).asClient());
-    await expect(failingRepo.getSubjectBySlug("d1", "sample")).rejects.toThrow("Failed to get subject");
+    await expect(failingRepo.getSubjectPath("d-slug", "s-slug")).rejects.toThrow(
+      "Failed to get subject path 'd-slug/s-slug'",
+    );
+  });
+
+  it("returns null when the subject path does not exist", async () => {
+    const repo = new SupabaseCatalogRepository(new FakeSupabaseClient(false, null).asClient());
+    expect(await repo.getSubjectPath("d-slug", "missing")).toBeNull();
   });
 
   it("lists topics and throws on error", async () => {
@@ -132,14 +152,23 @@ describe("SupabaseCatalogRepository", () => {
     await expect(failingRepo.listTopics("s1")).rejects.toThrow("Failed to list topics");
   });
 
-  it("gets topic by slug and throws on error", async () => {
-    const fakeClient = new FakeSupabaseClient().asClient();
-    const repo = new SupabaseCatalogRepository(fakeClient);
-    const topic = await repo.getTopicBySlug("s1", "sample");
-    expect(topic?.name).toBe("Sample");
+  it("resolves a topic path in one query and throws on error", async () => {
+    const topicRow = { id: "t1", slug: "t-slug", subject: sampleSubjectPathRow };
+    const repo = new SupabaseCatalogRepository(new FakeSupabaseClient(false, topicRow).asClient());
+    const path = await repo.getTopicPath("d-slug", "s-slug", "t-slug");
+    expect(path?.discipline.id).toBe("d1");
+    expect(path?.subject.id).toBe("s1");
+    expect(path?.topic.id).toBe("t1");
 
     const failingRepo = new SupabaseCatalogRepository(new FakeSupabaseClient(true).asClient());
-    await expect(failingRepo.getTopicBySlug("s1", "sample")).rejects.toThrow("Failed to get topic");
+    await expect(failingRepo.getTopicPath("d-slug", "s-slug", "t-slug")).rejects.toThrow(
+      "Failed to get topic path 'd-slug/s-slug/t-slug'",
+    );
+  });
+
+  it("returns null when the topic path does not exist", async () => {
+    const repo = new SupabaseCatalogRepository(new FakeSupabaseClient(false, null).asClient());
+    expect(await repo.getTopicPath("d-slug", "s-slug", "missing")).toBeNull();
   });
 
   it("gets material by topic id and throws on error", async () => {

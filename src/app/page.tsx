@@ -59,8 +59,10 @@ function renderDisciplineCard(discipline: DisciplineRecord, canManage: boolean) 
 }
 
 export default async function HomePage() {
-  const profile = await getCurrentUserProfile();
-  const disciplines = await fetchDisciplinesSafe();
+  const [profile, disciplines] = await Promise.all([
+    getCurrentUserProfile(),
+    fetchDisciplinesSafe(),
+  ]);
   const canManage = Boolean(profile && ["admin", "writer"].includes(profile.role));
 
   return (

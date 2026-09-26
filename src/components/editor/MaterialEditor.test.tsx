@@ -195,10 +195,8 @@ describe("MaterialEditor Component", () => {
   });
 
   it("submits valid revision successfully", async () => {
-    vi.mocked(saveMaterialRevision).mockResolvedValueOnce({
-      revisionId: "r1",
-      revisionNumber: 4,
-    });
+    // A action real não retorna nada: ela termina com redirect() para o tópico.
+    vi.mocked(saveMaterialRevision).mockResolvedValueOnce(undefined);
 
     render(
       <MaterialEditor
