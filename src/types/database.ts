@@ -57,7 +57,9 @@ export interface MaterialRevisionRecord {
 }
 
 export interface MaterialRevisionWithAuthor extends MaterialRevisionRecord {
-  author: Pick<UserProfile, "id" | "full_name" | "avatar_url" | "role">;
+  // O embed de `profiles` volta null quando o perfil do autor não é visível/existe;
+  // as telas exibem "Autor anônimo" nesse caso.
+  author: Pick<UserProfile, "id" | "full_name" | "avatar_url" | "role"> | null;
 }
 
 export interface TopicWithMaterial extends TopicRecord {

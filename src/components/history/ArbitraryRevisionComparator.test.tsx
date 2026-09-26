@@ -14,12 +14,9 @@ const mockRevisions: MaterialRevisionWithAuthor[] = [
     created_at: "2026-09-15T12:00:00Z",
     author: {
       id: "u-1",
-      email: "author1@test.com",
       full_name: "Alice",
       avatar_url: null,
       role: "writer",
-      created_at: "",
-      updated_at: "",
     },
   },
   {
@@ -32,12 +29,9 @@ const mockRevisions: MaterialRevisionWithAuthor[] = [
     created_at: "2026-09-14T12:00:00Z",
     author: {
       id: "u-2",
-      email: "author2@test.com",
       full_name: "Bob",
       avatar_url: null,
       role: "writer",
-      created_at: "",
-      updated_at: "",
     },
   },
   {
