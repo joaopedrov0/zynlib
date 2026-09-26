@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import { MarkdownView } from "@/components/markdown/MarkdownView";
+import { useEditorScrollSync } from "./scrollSync/useEditorScrollSync";
 import { saveMaterialRevision } from "@/lib/actions/saveMaterialRevision";
 import {
   Eye,
@@ -42,6 +43,8 @@ export function MaterialEditor({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  useEditorScrollSync(textareaRef, previewRef, viewMode === "split");
 
   function insertFormatting(prefix: string, suffix: string = "") {
     const textarea = textareaRef.current;
@@ -251,11 +254,16 @@ export function MaterialEditor({
         )}
 
         {viewMode !== "edit" && (
-          <div className="h-[520px] p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-y-auto shadow-inner">
+          <div
+            ref={previewRef}
+            data-testid="material-preview"
+            className="h-[520px] p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-y-auto shadow-inner"
+          >
             <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block mb-3">
               Pré-visualização Dinâmica
             </span>
             <MarkdownView
+              withSourceLines
               content={
                 content.trim() ||
                 "*Nenhum conteúdo digitado. Digite ou use a barra de atalhos para começar.*"

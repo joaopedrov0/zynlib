@@ -28,6 +28,31 @@ describe("MaterialEditor Component", () => {
     expect(screen.getByText("Editando sobre Revisão #3")).toBeDefined();
   });
 
+  it("keeps the preview in step with the editor while scrolling in split mode", () => {
+    const { container } = render(
+      <MaterialEditor
+        topicId="t1"
+        disciplineSlug="comp"
+        subjectSlug="ed"
+        topicSlug="arvores"
+        initialContent={"## Um\n\ntexto\n\n## Dois"}
+      />
+    );
+    const editor = screen.getByDisplayValue(/## Um/) as HTMLTextAreaElement;
+    const preview = screen.getByTestId("material-preview");
+    // O jsdom não tem layout: só dá para garantir que a rolagem chega à prévia
+    Object.defineProperty(editor, "scrollHeight", { value: 1000 });
+    Object.defineProperty(editor, "clientHeight", { value: 100 });
+    Object.defineProperty(preview, "scrollHeight", { value: 1900 });
+    Object.defineProperty(preview, "clientHeight", { value: 100 });
+
+    editor.scrollTop = 900;
+    fireEvent.scroll(editor);
+
+    expect(container.querySelectorAll("[data-source-line]")).toHaveLength(3);
+    expect(preview.scrollTop).toBe(1800);
+  });
+
   it("switches view modes correctly", () => {
     render(
       <MaterialEditor
