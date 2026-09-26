@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/navigation/Breadcrumbs";
 import { MarkdownView } from "@/components/markdown/MarkdownView";
 import { getCurrentUserProfile } from "@/lib/auth/getCurrentUserProfile";
 import { getCatalogRepository } from "@/lib/repositories/getCatalogRepository";
+import { loadTopicWithMaterial } from "@/lib/repositories/loadTopicWithMaterial";
 import { History, Edit3, PlusCircle } from "lucide-react";
 
 interface TopicPageProps {
@@ -16,15 +17,14 @@ interface TopicPageProps {
 }
 
 export default async function TopicPage({ params }: TopicPageProps) {
-  const { disciplineSlug, subjectSlug, topicSlug } = await params;
-  const catalog = await getCatalogRepository();
-  const profile = await getCurrentUserProfile();
+  const slugs = await params;
+  const [profile, view] = await Promise.all([
+    getCurrentUserProfile(),
+    getCatalogRepository().then((catalog) => loadTopicWithMaterial(catalog, slugs)),
+  ]);
+  if (!view) notFound();
 
-  const topicPath = await catalog.getTopicPath(disciplineSlug, subjectSlug, topicSlug);
-  if (!topicPath) notFound();
-
-  const { discipline, subject, topic } = topicPath;
-  const material = await catalog.getMaterialByTopicId(topic.id);
+  const { discipline, subject, topic, material } = view;
   const currentRevision = material?.current_revision;
   const canEdit = Boolean(profile);
 
