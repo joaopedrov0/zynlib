@@ -167,6 +167,33 @@ describe("Server Component Pages", () => {
     expect(screen.getByText("Conteúdo de Limites:")).toBeDefined();
   });
 
+  it("removes outer card borders and padding on mobile for material reading", async () => {
+    const Component = await TopicPage({
+      params: Promise.resolve({
+        disciplineSlug: "matematica",
+        subjectSlug: "calculo",
+        topicSlug: "limites",
+      }),
+    });
+    render(Component);
+
+    const revisionElement = screen.getByText(/Revisão #1/);
+    const materialContainer = revisionElement.parentElement?.parentElement;
+    expect(materialContainer).toBeDefined();
+
+    // Mobile: removes borders, extra padding, and card chrome to maximize usable screen width
+    expect(materialContainer?.className).toContain("border-0");
+    expect(materialContainer?.className).toContain("p-0");
+    expect(materialContainer?.className).toContain("rounded-none");
+    expect(materialContainer?.className).toContain("bg-transparent");
+
+    // Desktop (sm): keeps the card border, padding, and elevation unchanged
+    expect(materialContainer?.className).toContain("sm:border");
+    expect(materialContainer?.className).toContain("sm:p-8");
+    expect(materialContainer?.className).toContain("sm:rounded-2xl");
+    expect(materialContainer?.className).toContain("sm:bg-white");
+  });
+
   it("renders TopicPage empty state with write button when authenticated", async () => {
     fakeRepo.getMaterialByTopicId.mockResolvedValueOnce(null);
     vi.mocked(getCurrentUserProfile).mockResolvedValueOnce({
