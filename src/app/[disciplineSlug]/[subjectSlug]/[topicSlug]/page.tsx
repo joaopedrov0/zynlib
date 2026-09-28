@@ -82,7 +82,7 @@ export default async function TopicPage({ params }: TopicPageProps) {
         </div>
 
         {currentRevision ? (
-          <div className="bg-white dark:bg-zinc-900/60 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 shadow-xs">
+          <div className="bg-transparent sm:bg-white dark:bg-transparent dark:sm:bg-zinc-900/60 rounded-none sm:rounded-2xl border-0 sm:border border-zinc-200 dark:border-zinc-800 p-0 sm:p-8 shadow-none sm:shadow-xs">
             <div className="mb-6 flex items-center justify-between text-xs text-zinc-500 border-b border-zinc-100 dark:border-zinc-800/80 pb-3">
               <span>Revisão #{currentRevision.revision_number}</span>
               <span>
